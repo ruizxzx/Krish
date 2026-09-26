@@ -1,10 +1,15 @@
--- Run this migration once on an existing KRISH portfolio Supabase project.
--- It adds CMS-managed project media and a public media bucket for images/videos.
-
+-- Existing project migration for CMS visual assets.
 alter table public.portfolio_projects
   add column if not exists media jsonb not null default '[]'::jsonb;
 
+alter table public.portfolio_site
+  add column if not exists profile_media jsonb not null default '{}'::jsonb;
+
 insert into storage.buckets (id, name, public)
+values ('portfolio-media', 'portfolio-media', true)
+on conflict (id) do update set public = true;
+
+
 values ('portfolio-media', 'portfolio-media', true)
 on conflict (id) do update set public = true;
 
