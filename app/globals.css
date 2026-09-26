@@ -2447,3 +2447,48 @@ body:after{
 @media(prefers-reduced-motion:reduce){
   .liquid-portrait img,.liquid-portrait-shine{transition:none!important}
 }
+
+
+.project-card-liquid{
+  position:absolute;
+  left:var(--media-x,50%);
+  top:var(--media-y,50%);
+  width:170px;
+  aspect-ratio:1;
+  transform:translate(-50%,-50%) scale(.55);
+  border-radius:50%;
+  z-index:9;
+  pointer-events:none;
+  opacity:0;
+  background:
+    radial-gradient(circle at 32% 25%,rgba(255,255,255,.62),transparent 11%),
+    radial-gradient(circle at 66% 70%,rgba(111,154,255,.18),transparent 25%),
+    rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:
+    inset 9px 8px 25px rgba(255,255,255,.16),
+    inset -11px -14px 28px rgba(0,0,0,.18),
+    0 20px 45px rgba(0,0,0,.18);
+  backdrop-filter:blur(6px) saturate(1.55);
+  -webkit-backdrop-filter:blur(6px) saturate(1.55);
+  transition:opacity .45s var(--ease),transform .65s var(--ease);
+}
+.project-card-media--gallery.is-hovered .project-card-liquid{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+.project-card-liquid:after{
+  content:"";
+  position:absolute;
+  inset:13%;
+  border-radius:50%;
+  border-top:1px solid rgba(255,255,255,.42);
+  border-left:1px solid rgba(255,255,255,.18);
+  transform:rotate(-28deg);
+}
+@media(max-width:900px){
+  .project-card-liquid{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .project-card-liquid{transition:none!important}
+}
