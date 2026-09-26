@@ -175,6 +175,13 @@ function TiltCard({ project }: { project: Project }) {
 
   return (
     <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label="VIEW" onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
+      </div>
+      <div className="project-card-info">
+        <div className="project-card-heading"><span>{project.eyebrow}</span><h3>{project.title}</h3></div>
+        <div className="project-card-meta"><p>{project.short}</p><span>{project.year} <b>↗</b></span></div>
+      </div>
+    </Link>
+  );
 
 function ServiceRow({ item, index, active, onOpen }: { item: Service; index: number; active: number; onOpen: (next: number) => void }) {
   const isOpen = active === index;
