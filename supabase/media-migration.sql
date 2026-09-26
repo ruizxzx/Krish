@@ -9,10 +9,6 @@ insert into storage.buckets (id, name, public)
 values ('portfolio-media', 'portfolio-media', true)
 on conflict (id) do update set public = true;
 
-
-values ('portfolio-media', 'portfolio-media', true)
-on conflict (id) do update set public = true;
-
 drop policy if exists "portfolio media public read" on storage.objects;
 drop policy if exists "portfolio media authenticated upload" on storage.objects;
 drop policy if exists "portfolio media authenticated update" on storage.objects;
@@ -43,6 +39,10 @@ to authenticated
 using (bucket_id = 'portfolio-media');
 
 grant usage on schema public to service_role;
+
+grant select, insert, update, delete
+on public.portfolio_site
+to service_role;
 
 grant select, insert, update, delete
 on public.portfolio_projects
