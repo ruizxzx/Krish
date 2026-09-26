@@ -110,7 +110,7 @@ function ProjectHoverMedia({ project }: { project: Project }) {
   };
 
   const enter = () => {
-    const card = document.querySelector<HTMLElement>(\`[data-project-media="\${project.slug}"]\`);
+    const card = document.querySelector<HTMLElement>(`[data-project-media="${project.slug}"]`);
     bounds.current = card?.getBoundingClientRect() ?? null;
     setHovered(true);
     setActive(0);
@@ -141,7 +141,7 @@ function ProjectHoverMedia({ project }: { project: Project }) {
 
   return (
     <div
-      className={\`project-card-media project-card-media--gallery \${hovered ? 'is-hovered' : ''}\`}
+      className={`project-card-media project-card-media--gallery ${hovered ? 'is-hovered' : ''}`}
       data-project-media={project.slug}
       onMouseEnter={enter}
       onMouseMove={move}
@@ -150,7 +150,7 @@ function ProjectHoverMedia({ project }: { project: Project }) {
     >
       <div className="project-card-gallery">
         {media.map((item, index) => (
-          <div key={item.id} className={\`project-card-gallery-item \${index === active ? 'is-active' : ''}\`}>
+          <div key={item.id} className={`project-card-gallery-item ${index === active ? 'is-active' : ''}`}>
             {item.type === 'video' ? (
               <video
                 ref={(node) => { videos.current[index] = node; }}
@@ -190,10 +190,10 @@ function TiltCard({ project }: { project: Project }) {
     if (!el || !rect) return;
     const px = (pointer.current.x - rect.left) / rect.width - 0.5;
     const py = (pointer.current.y - rect.top) / rect.height - 0.5;
-    el.style.setProperty('--tilt-x', \`\${py * -5}deg\`);
-    el.style.setProperty('--tilt-y', \`\${px * 5}deg\`);
-    el.style.setProperty('--parallax-x', \`\${px * 18}px\`);
-    el.style.setProperty('--parallax-y', \`\${py * 18}px\`);
+    el.style.setProperty('--tilt-x', `${py * -5}deg`);
+    el.style.setProperty('--tilt-y', `${px * 5}deg`);
+    el.style.setProperty('--parallax-x', `${px * 18}px`);
+    el.style.setProperty('--parallax-y', `${py * 18}px`);
   };
 
   const move = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -225,7 +225,7 @@ function TiltCard({ project }: { project: Project }) {
   };
 
   return (
-    <Link href={\`/work/\${project.slug}\`} ref={ref} className={\`project-card project-card--\${project.accent}\`} data-cursor="project" data-cursor-label={project.media?.length ? 'EXPLORE' : 'VIEW'} onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
+    <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label={project.media?.length ? 'EXPLORE' : 'VIEW'} onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
       <ProjectHoverMedia project={project} />
       <div className="project-card-info">
         <div className="project-card-heading"><span>{project.eyebrow}</span><h3>{project.title}</h3></div>
