@@ -199,7 +199,7 @@ export function Portfolio({ content }: Props) {
     const lenis = reduce ? null : new Lenis({ duration: 1.15, smoothWheel: true, syncTouch: true, lerp: 0.075 });
     let raf = 0;
     if (lenis) {
-      lenis.on('scroll', ScrollTrigger.update);
+      lenis.on('scroll', () => ScrollTrigger.update());
       const loop = (time: number) => { lenis.raf(time); raf = requestAnimationFrame(loop); };
       raf = requestAnimationFrame(loop);
     }
