@@ -175,3 +175,175 @@ body:before{content:"";position:fixed;inset:0;z-index:140;pointer-events:none;op
   .hero-brutal-enter,.project-art{transition:none}
   .project-art .art-core{animation:none}
 }
+
+
+/* =========================================================
+   AWWWARDS INTERACTION LAYER — cursor / hover / atmosphere
+   ========================================================= */
+@media (pointer:fine){
+  html,body,a,button{cursor:none!important}
+  .cursor-trail,.cursor-dot,.cursor-ring{position:fixed;left:0;top:0;pointer-events:none;transform:translate3d(-100px,-100px,0)}
+  .cursor-trail{width:7px;height:7px;border-radius:50%;z-index:496;background:var(--acid);box-shadow:0 0 18px #d9ff6450;mix-blend-mode:screen;will-change:transform,opacity}
+  .cursor-dot{position:fixed;left:0;top:0;will-change:transform}
+  .cursor-ring{position:fixed;left:0;top:0;display:grid;place-items:center;will-change:transform}
+}
+
+.hero--brutal:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:radial-gradient(420px circle at var(--spot-x,50%) var(--spot-y,50%),#d9ff6410,transparent 68%);
+  opacity:.9;
+  transition:opacity .5s ease;
+}
+.brutal-grid{
+  background-size:25% 100%;
+  animation:brutalGridDrift 18s linear infinite;
+}
+.brutal-grid:after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:-20%;
+  height:24%;
+  background:linear-gradient(to bottom,transparent,#d9ff6410,transparent);
+  filter:blur(9px);
+  animation:heroScan 7s cubic-bezier(.55,0,.45,1) infinite;
+}
+.brutal-noise{animation:noiseFlicker 2.7s steps(2,end) infinite}
+.hero-brutal-top,.hero-brutal-edge{z-index:3}
+.hero-brutal-top span,.hero-brutal-edge span{transition:color .35s ease,transform .55s var(--ease)}
+.hero-brutal-top span:hover,.hero-brutal-edge span:hover{color:var(--acid);transform:translateY(-2px)}
+.hero-brutal-title>span:first-child{transition:transform .8s var(--ease),letter-spacing .8s var(--ease)}
+.hero-brutal-title>span:nth-child(2){transition:transform .8s var(--ease),letter-spacing .8s var(--ease)}
+.hero-brutal-title:hover>span:first-child{transform:translateX:-.8vw;letter-spacing:-.13em}
+.hero-brutal-title:hover>span:nth-child(2){transform:translateX:.8vw;letter-spacing:-.105em}
+.hero-brutal-outline:after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:2%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--acid),transparent);
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .8s var(--ease);
+}
+.hero-brutal-title:hover .hero-brutal-outline:after{transform:scaleX(1)}
+.hero-brutal-dot{
+  display:inline-block;
+  animation:acidBlink 2.4s ease-in-out infinite;
+}
+.hero-brutal-enter{position:relative;overflow:hidden;isolation:isolate}
+.hero-brutal-enter:before{
+  content:"";
+  position:absolute;
+  inset:-50%;
+  background:conic-gradient(from 0deg,transparent 0 72%,#d9ff64 78%,transparent 84%);
+  animation:ctaSpin 5s linear infinite;
+  z-index:-2;
+}
+.hero-brutal-enter:after{
+  content:"";
+  position:absolute;
+  inset:2px;
+  border-radius:inherit;
+  background:#070807;
+  z-index:-1;
+  transition:background .5s var(--ease);
+}
+.hero-brutal-enter:hover:after{background:var(--acid)}
+.hero-brutal-enter b{transition:transform .5s var(--ease)}
+.hero-brutal-enter:hover b{transform:translateY(6px)}
+.brutal-cross{transition:color .35s ease,transform .5s var(--ease);animation:crossFloat 4s ease-in-out infinite}
+.brutal-cross--b{animation-delay:-2s}
+.hero-brutal-statement p{position:relative}
+.hero-brutal-statement p:before{
+  content:"";
+  display:inline-block;
+  width:0;
+  height:1px;
+  background:var(--acid);
+  vertical-align:middle;
+  margin-right:0;
+  transition:width .7s var(--ease),margin-right .7s var(--ease);
+}
+.hero-brutal-statement:hover p:before{width:28px;margin-right:9px}
+.hero-brutal-main{will-change:transform}
+
+.project-card-media:after{
+  content:"";
+  position:absolute;
+  inset:-30%;
+  pointer-events:none;
+  background:linear-gradient(110deg,transparent 42%,#ffffff12 49%,#ffffff28 50%,transparent 58%);
+  transform:translateX(-70%) rotate(7deg);
+  transition:transform 1.1s cubic-bezier(.16,1,.3,1);
+}
+.project-card:hover .project-card-media:after{transform:translateX(70%) rotate(7deg)}
+.project-card-grid{transition:transform 1.2s var(--ease),opacity .6s ease}
+.project-card:hover .project-card-grid{transform:scale(1.12) rotate(.7deg);opacity:.8}
+.project-card-orbit--one{transition:transform .9s var(--ease),border-color .5s ease}
+.project-card:hover .project-card-orbit--one{border-color:color-mix(in srgb,var(--accent) 72%,white);transform:translate(-50%,-50%) translate(calc(var(--parallax-x,0px)*1.35),calc(var(--parallax-y,0px)*1.35)) rotate(18deg) scale(1.08)}
+.project-card-orbit--two{transition:transform .9s var(--ease)}
+.project-card:hover .project-card-orbit--two{transform:translate(-50%,-50%) translate(calc(var(--parallax-x,0px)*-1.1),calc(var(--parallax-y,0px)*-1.1)) rotate(-22deg) scale(.92)}
+.project-card-core{transition:transform .8s var(--ease),box-shadow .5s ease,filter .5s ease}
+.project-card:hover .project-card-core{filter:saturate(1.25);box-shadow:0 0 105px color-mix(in srgb,var(--accent) 62%,transparent),0 0 190px color-mix(in srgb,var(--accent) 20%,transparent)}
+.project-card-scan{animation-duration:2.7s}
+.project-card-code,.project-card-index{transition:color .35s ease,transform .45s var(--ease)}
+.project-card:hover .project-card-code{color:var(--accent);transform:translateX(5px)}
+.project-card:hover .project-card-index{color:#fff;transform:translateY(-4px)}
+.project-card-info{transition:transform .7s var(--ease)}
+.project-card:hover .project-card-info{transform:translateX(5px)}
+
+.manifesto{position:relative}
+.manifesto:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 5px,#090b0910 6px 7px);
+  mix-blend-mode:multiply;
+}
+.statement-row{transition:letter-spacing .8s var(--ease)}
+.statement-row:hover{letter-spacing:-.075em}
+.ticker{position:relative}
+.ticker:before,.ticker:after{content:"";position:absolute;top:0;bottom:0;width:90px;z-index:2;pointer-events:none}
+.ticker:before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.ticker:after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
+
+[data-cursor="link"],[data-cursor="project"],[data-cursor="image"],[data-cursor="drag"]{transition:filter .35s ease}
+[data-cursor="link"]:hover{filter:brightness(1.14)}
+[data-cursor="project"]:hover{filter:brightness(1.04)}
+
+@keyframes brutalGridDrift{0%{background-position:0 0}50%{background-position:18px 0}100%{background-position:0 0}}
+@keyframes heroScan{0%{transform:translateY(-140%)}45%,100%{transform:translateY(520%)}}
+@keyframes noiseFlicker{0%,100%{opacity:.025}48%{opacity:.035}50%{opacity:.018}52%{opacity:.04}}
+@keyframes acidBlink{0%,72%,100%{opacity:1}75%{opacity:.35}78%{opacity:1}}
+@keyframes ctaSpin{to{transform:rotate(360deg)}}
+@keyframes crossFloat{50%{transform:translateY(-8px) rotate(90deg)}}
+@keyframes scan2{0%{transform:translateY(-50%) translateX(-25%);opacity:0}22%{opacity:.65}50%{transform:translateY(-50%) translateX(25%);opacity:.2}75%,100%{transform:translateY(-50%) translateX(75%);opacity:0}}
+
+@media(pointer:coarse){
+  .hero--brutal:after{background:radial-gradient(320px circle at 70% 38%,#d9ff6408,transparent 68%)}
+  .brutal-grid{animation:none}
+  .brutal-noise{animation:none}
+  .brutal-grid:after{animation:none}
+  .hero-brutal-title:hover>span:first-child,.hero-brutal-title:hover>span:nth-child(2){transform:none;letter-spacing:inherit}
+  .hero-brutal-enter:before{animation:none}
+  .project-card-media:after{display:none}
+  .project-card:hover .project-card-grid,.project-card:hover .project-card-orbit--one,.project-card:hover .project-card-orbit--two,.project-card:hover .project-card-core{transform:none}
+}
+
+@media(max-width:620px){
+  .site-nav{background:linear-gradient(#070807ee,#07080700);mix-blend-mode:normal}
+  .hero-brutal-top{top:82px}
+  .hero-brutal-main{top:52%}
+  .hero-brutal-title{font-size:20.3vw}
+  .hero-brutal-statement p{font-size:11.5px}
+  .hero-brutal-enter{width:102px;height:102px}
+}
