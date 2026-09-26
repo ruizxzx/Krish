@@ -44,7 +44,22 @@ export async function getPortfolioContent(): Promise<SiteContent> {
       status: String(p.status ?? ''), role: String(p.role ?? ''), stack: String(p.stack ?? ''), intro: String(p.intro ?? ''), short: String(p.short ?? ''),
       accent: String(p.accent ?? 'acid') as Accent, metricLabel: String(p.metric_label ?? ''), metricValue: String(p.metric_value ?? ''),
       liveUrl: p.live_url ? String(p.live_url) : undefined, repoUrl: p.repo_url ? String(p.repo_url) : undefined,
-      featured: Boolean(p.featured), sections: Array.isArray(p.sections) ? p.sections as Project['sections'] : [],
+      featured: Boolean(p.featured),
+      media: Array.isArray(p.media)
+        ? p.media
+            .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object' && typeof (item as Record<string, unknown>).src === 'string')
+            .map((item, index) => ({
+              id: String(item.id ?? index),
+              type: item.type === 'video' ? 'video' as const : 'image' as const,
+              src: String(item.src),
+              alt: String(item.alt ?? ''),
+              caption: item.caption ? String(item.caption) : undefined,
+              poster: item.poster ? String(item.poster) : undefined,
+              path: item.path ? String(item.path) : undefined,
+              featured: Boolean(item.featured),
+            }))
+        : [],
+      sections: Array.isArray(p.sections) ? p.sections as Project['sections'] : [],
     }));
 
     return {
