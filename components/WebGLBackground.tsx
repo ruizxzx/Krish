@@ -2,103 +2,169 @@
 
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
-function ParticleField() {
+function ParticleField({ intensity }: { intensity: number }) {
   const points = useRef<THREE.Points>(null);
-  const material = useRef<THREE.PointsMaterial>(null);
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    const count = 1300;
+    const count = 1500;
     const positions = new Float32Array(count * 3);
-    const sizes = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      const r = 2.4 + Math.pow(Math.random(), .65) * 4.8;
-      const a = Math.random() * Math.PI * 2;
-      positions[i * 3] = Math.cos(a) * r;
-      positions[i * 3 + 1] = (Math.random() - .5) * 4.8;
-      positions[i * 3 + 2] = Math.sin(a) * r;
-      sizes[i] = .4 + Math.random() * 1.8;
+    for (let i = 0; i < count; i += 1) {
+      const r = 2.8 + Math.pow(Math.random(), 0.65) * 5.5;
+      const angle = Math.random() * Math.PI * 2;
+      positions[i * 3] = Math.cos(angle) * r;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 6.2;
+      positions[i * 3 + 2] = Math.sin(angle) * r;
     }
     g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    g.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
     return g;
   }, []);
 
-  useFrame(({ clock, pointer }) => {
-    if (!points.current) return;
-    points.current.rotation.y += .0008;
-    points.current.rotation.x = THREE.MathUtils.lerp(points.current.rotation.x, pointer.y * .08, .025);
-    points.current.rotation.z = THREE.MathUtils.lerp(points.current.rotation.z, pointer.x * -.04, .025);
-    if (material.current) material.current.opacity = .28 + Math.sin(clock.elapsedTime * .7) * .035;
+  useFrame(({ pointer, clock }) => {
+    const node = points.current;
+    if (!node) return;
+    node.rotation.y += 0.0007 * intensity;
+    node.rotation.x = THREE.MathUtils.lerp(node.rotation.x, pointer.y * 0.08, 0.025);
+    node.rotation.z = THREE.MathUtils.lerp(node.rotation.z, pointer.x * -0.06, 0.025);
+    const material = node.material as THREE.PointsMaterial;
+    material.opacity = 0.16 + Math.sin(clock.elapsedTime * 0.55) * 0.025;
   });
 
   return (
     <points ref={points} geometry={geometry}>
-      <pointsMaterial ref={material} color="#d8ff54" size={.025} sizeAttenuation transparent opacity={.3} depthWrite={false} />
+      <pointsMaterial color="#d9ff64" size={0.024} transparent opacity={0.16} depthWrite={false} sizeAttenuation />
     </points>
   );
 }
 
-function Core() {
-  const group = useRef<THREE.Group>(null);
-  const shell = useRef<THREE.Mesh>(null);
-  const wire = useRef<THREE.Mesh>(null);
-
-  useFrame(({ clock, pointer }, delta) => {
-    if (!group.current || !shell.current || !wire.current) return;
-    const t = clock.elapsedTime;
-    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, pointer.y * -.22 + Math.sin(t * .2) * .08, .035);
-    group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, pointer.x * .34 + t * .09, .035);
-    group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, pointer.x * .35, .03);
-    group.current.position.y = THREE.MathUtils.lerp(group.current.position.y, pointer.y * -.25 + Math.sin(t * .65) * .12, .03);
-    shell.current.rotation.z += delta * .16;
-    wire.current.rotation.x -= delta * .12;
-    wire.current.rotation.y += delta * .19;
-    const pulse = 1 + Math.sin(t * 1.15) * .035;
-    shell.current.scale.setScalar(pulse);
+function OrbitalRing({ radius, rotation, color, speed, dashed = false }: { radius: number; rotation: [number, number, number]; color: string; speed: number; dashed?: boolean }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((_, delta) => {
+    if (!ref.current) return;
+    ref.current.rotation.z += delta * speed;
+    ref.current.rotation.x += delta * speed * 0.11;
   });
-
   return (
-    <group ref={group}>
-      <mesh ref={shell}>
-        <icosahedronGeometry args={[1.32, 5]} />
-        <meshPhysicalMaterial color="#cfeaa1" roughness={.24} metalness={.55} transmission={.15} transparent opacity={.2} wireframe />
+    <mesh ref={ref} rotation={rotation}>
+      <torusGeometry args={[radius, dashed ? 0.008 : 0.013, 12, 160]} />
+      <meshBasicMaterial color={color} transparent opacity={dashed ? 0.33 : 0.48} depthWrite={false} />
+    </mesh>
+  );
+}
+
+function FloatingPanel({ index, position, rotation, accent }: { index: number; position: [number, number, number]; rotation: [number, number, number]; accent: string }) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    const t = clock.elapsedTime + index;
+    ref.current.position.y = position[1] + Math.sin(t * 0.55) * 0.12;
+    ref.current.rotation.z = rotation[2] + Math.sin(t * 0.3) * 0.07;
+  });
+  return (
+    <group ref={ref} position={position} rotation={rotation}>
+      <mesh>
+        <boxGeometry args={[0.68, 0.98, 0.045]} />
+        <meshBasicMaterial color="#101312" transparent opacity={0.76} />
       </mesh>
-      <mesh ref={wire} scale={1.35}>
-        <torusKnotGeometry args={[1.05, .025, 180, 12, 2, 3]} />
-        <meshBasicMaterial color="#70f0ff" transparent opacity={.28} />
+      <mesh position={[0, 0, 0.026]}>
+        <boxGeometry args={[0.48, 0.68, 0.012]} />
+        <meshBasicMaterial color={accent} transparent opacity={0.18} />
       </mesh>
-      <mesh scale={.42}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial color="#d8ff54" transparent opacity={.16} />
+      <mesh position={[-0.24, 0.35, 0.032]}>
+        <boxGeometry args={[0.14, 0.012, 0.008]} />
+        <meshBasicMaterial color="#e9ece2" transparent opacity={0.55} />
+      </mesh>
+      <mesh position={[-0.24, 0.28, 0.032]}>
+        <boxGeometry args={[0.22, 0.008, 0.008]} />
+        <meshBasicMaterial color="#e9ece2" transparent opacity={0.28} />
       </mesh>
     </group>
   );
 }
 
-function Scene() {
+function Core({ intensity }: { intensity: number }) {
+  const root = useRef<THREE.Group>(null);
+  const shell = useRef<THREE.Mesh>(null);
+  const knot = useRef<THREE.Mesh>(null);
+  const scroll = useRef(0);
+
+  useEffect(() => {
+    const update = () => {
+      const max = Math.max(document.documentElement.scrollHeight - innerHeight, 1);
+      scroll.current = window.scrollY / max;
+    };
+    addEventListener('scroll', update, { passive: true });
+    update();
+    return () => removeEventListener('scroll', update);
+  }, []);
+
+  useFrame(({ pointer, clock }, delta) => {
+    if (!root.current || !shell.current || !knot.current) return;
+    const t = clock.elapsedTime;
+    const s = scroll.current;
+    root.current.rotation.x = THREE.MathUtils.lerp(root.current.rotation.x, pointer.y * -0.18 + s * 0.65 + Math.sin(t * 0.18) * 0.04, 0.032);
+    root.current.rotation.y = THREE.MathUtils.lerp(root.current.rotation.y, pointer.x * 0.32 + t * 0.075 + s * 1.2, 0.032);
+    root.current.position.x = THREE.MathUtils.lerp(root.current.position.x, pointer.x * 0.22, 0.03);
+    root.current.position.y = THREE.MathUtils.lerp(root.current.position.y, pointer.y * -0.16 + Math.sin(t * 0.55) * 0.1, 0.03);
+    root.current.position.z = THREE.MathUtils.lerp(root.current.position.z, -s * 0.8, 0.035);
+    shell.current.rotation.z += delta * 0.19 * intensity;
+    knot.current.rotation.x -= delta * 0.12 * intensity;
+    knot.current.rotation.y += delta * 0.22 * intensity;
+    knot.current.scale.setScalar(1 + Math.sin(t * 1.15) * 0.028);
+  });
+
+  return (
+    <group ref={root}>
+      <mesh ref={shell}>
+        <icosahedronGeometry args={[1.36, 5]} />
+        <meshPhysicalMaterial color="#cfe9a1" roughness={0.24} metalness={0.6} transmission={0.12} transparent opacity={0.17} wireframe />
+      </mesh>
+      <mesh ref={knot} scale={1.16}>
+        <torusKnotGeometry args={[1.04, 0.036, 220, 12, 2, 3]} />
+        <meshBasicMaterial color="#71efff" transparent opacity={0.33} />
+      </mesh>
+      <mesh scale={0.38}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial color="#d9ff64" transparent opacity={0.36} />
+      </mesh>
+      <mesh position={[0.7, 0.22, 0]}>
+        <sphereGeometry args={[0.07, 16, 16]} />
+        <meshBasicMaterial color="#a27bff" />
+      </mesh>
+      <OrbitalRing radius={1.72} rotation={[0.55, 0.25, 0.15]} color="#d9ff64" speed={0.18 * intensity} />
+      <OrbitalRing radius={2.04} rotation={[1.06, -0.2, 0.4]} color="#71efff" speed={-0.12 * intensity} dashed />
+      <OrbitalRing radius={2.38} rotation={[0.22, 1.0, -0.35]} color="#a27bff" speed={0.08 * intensity} dashed />
+      <FloatingPanel index={1} position={[2.55, 0.78, -0.35]} rotation={[0.15, -0.4, -0.15]} accent="#d9ff64" />
+      <FloatingPanel index={2} position={[-2.45, -0.55, -0.8]} rotation={[0.1, 0.35, 0.18]} accent="#71efff" />
+      <FloatingPanel index={3} position={[0.4, -2.25, -1.0]} rotation={[-0.15, 0.15, 0.08]} accent="#a27bff" />
+    </group>
+  );
+}
+
+function Scene({ intensity }: { intensity: number }) {
   return (
     <>
-      <ambientLight intensity={.35} />
-      <pointLight position={[2, 2, 4]} intensity={5} color="#d8ff54" distance={8} />
-      <pointLight position={[-4, -1, 1]} intensity={3} color="#704cff" distance={7} />
-      <ParticleField />
-      <Core />
+      <ambientLight intensity={0.34} />
+      <pointLight position={[2.2, 2.4, 4.2]} intensity={5.3} color="#d9ff64" distance={9} />
+      <pointLight position={[-4, -1.5, 2]} intensity={2.8} color="#744dff" distance={8} />
+      <ParticleField intensity={intensity} />
+      <Core intensity={intensity} />
     </>
   );
 }
 
-export function WebGLBackground() {
+export function WebGLBackground({ intensity = 1 }: { intensity?: number }) {
   return (
     <Canvas
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0, 6.8], fov: 42 }}
+      camera={{ position: [0, 0, 7.1], fov: 42 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      fallback={<span />}
+      className="hero-canvas"
+      fallback={<div />}
       onCreated={({ gl }) => gl.setClearColor(new THREE.Color('#070808'), 0)}
     >
-      <Scene />
+      <Scene intensity={Math.max(0.45, Math.min(intensity, 1.7))} />
     </Canvas>
   );
 }
