@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requirePortfolioAdmin } from '@/lib/cms';
+import type { ProjectMedia } from '@/lib/content';
 import { createClient } from '@/lib/supabase/server';
 
 function text(formData: FormData, name: string) { return String(formData.get(name) ?? '').trim(); }
@@ -132,6 +133,39 @@ export async function saveProject(formData: FormData) {
   const slug = text(formData, 'slug');
   if (slug) revalidatePath('/work/' + slug);
   redirect('/admin?saved=project');
+}
+
+export async function saveProjectMedia(projectId: string, media: ProjectMedia[]) {
+  try {
+    if (!projectId) throw new Error('Project id is required.');
+    const db = await requirePortfolioAdmin();
+    const cleaned = media.map((item) => ({
+      id: String(item.id),
+      type: item.type === 'video' ? 'video' as const : 'image' as const,
+      src: String(item.src),
+      alt: String(item.alt ?? ''),
+      caption: item.caption ? String(item.caption) : '',
+      poster: item.poster ? String(item.poster) : '',
+      path: item.path ? String(item.path) : '',
+      featured: Boolean(item.featured),
+    })).filter((item) => item.src);
+
+    const { data, error } = await db
+      .from('portfolio_projects')
+      .update({ media: cleaned, updated_at: new Date().toISOString() })
+      .eq('id', projectId)
+      .select('slug')
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error('Project not found.');
+    revalidatePath('/');
+    revalidatePath('/work/' + data.slug);
+    return { ok: true as const };
+  } catch (error) {
+    console.error('[CMS] saveProjectMedia failed', error);
+    return { ok: false as const, error: 'Save media failed — ' + describeError(error) };
+  }
 }
 
 export async function deleteProject(formData: FormData) {
