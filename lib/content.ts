@@ -1,5 +1,11 @@
 export type Accent = 'acid' | 'violet' | 'cyan' | 'orange';
 
+export type ProfileMedia = {
+  src: string;
+  path?: string;
+  alt: string;
+};
+
 export type ProjectMedia = {
   id: string;
   type: 'image' | 'video';
@@ -59,6 +65,7 @@ export type SiteContent = {
   contactBody: string;
   contactEmail: string;
   footerNote: string;
+  profileMedia?: ProfileMedia;
   projects: Project[];
   experience: Experience[];
   services: Service[];
