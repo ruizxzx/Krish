@@ -7,15 +7,32 @@ import { createClient } from '@/lib/supabase/server';
 
 function text(formData: FormData, name: string) { return String(formData.get(name) ?? '').trim(); }
 
+function adminErrorUrl(message: string) {
+  const safe = message.replace(/\s+/g, ' ').trim().slice(0, 240);
+  return '/admin?error=' + encodeURIComponent(safe);
+}
+
+function redirectDbError(operation: string, error: { message?: string; code?: string; details?: string; hint?: string }) {
+  const parts = [operation, error.message, error.code ? `code=${error.code}` : '', error.details ? `details=${error.details}` : '', error.hint ? `hint=${error.hint}` : '']
+    .filter(Boolean)
+    .join(' — ');
+  redirect(adminErrorUrl(parts));
+}
+
 function sections(value: string) {
   if (!value.trim()) return [];
-  const parsed: unknown = JSON.parse(value);
-  if (!Array.isArray(parsed)) throw new Error('Sections must be an array.');
-  return parsed.map((item) => {
-    if (!item || typeof item !== 'object') throw new Error('Invalid section.');
-    const row = item as Record<string, unknown>;
-    return { kicker: String(row.kicker ?? ''), heading: String(row.heading ?? ''), body: String(row.body ?? '') };
-  });
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) throw new Error('Sections must be an array.');
+    return parsed.map((item) => {
+      if (!item || typeof item !== 'object') throw new Error('Invalid section.');
+      const row = item as Record<string, unknown>;
+      return { kicker: String(row.kicker ?? ''), heading: String(row.heading ?? ''), body: String(row.body ?? '') };
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Invalid sections JSON.';
+    throw new Error(message);
+  }
 }
 
 export async function saveSite(formData: FormData) {
@@ -51,8 +68,13 @@ export async function saveSite(formData: FormData) {
     },
     updated_at: new Date().toISOString(),
   };
+
   const { error } = await db.from('portfolio_site').upsert(payload);
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error('[CMS] saveSite failed', error);
+    redirectDbError('Save site failed', error);
+  }
+
   revalidatePath('/');
   revalidatePath('/work/[slug]', 'page');
   redirect('/admin?saved=site');
@@ -61,6 +83,15 @@ export async function saveSite(formData: FormData) {
 export async function saveProject(formData: FormData) {
   const db = await requirePortfolioAdmin();
   const id = text(formData, 'id');
+  let parsedSections: ReturnType<typeof sections>;
+
+  try {
+    parsedSections = sections(text(formData, 'sections'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Invalid sections JSON.';
+    redirect(adminErrorUrl('Save project failed — ' + message));
+  }
+
   const row = {
     slug: text(formData, 'slug'),
     sort_index: Number(formData.get('sort_index') ?? 0) || 0,
@@ -79,13 +110,21 @@ export async function saveProject(formData: FormData) {
     live_url: text(formData, 'live_url') || null,
     repo_url: text(formData, 'repo_url') || null,
     featured: formData.get('featured') === 'on',
-    sections: sections(text(formData, 'sections')),
+    sections: parsedSections,
     updated_at: new Date().toISOString(),
   };
-  if (!row.slug || !row.title) throw new Error('Project slug and title are required.');
+
+  if (!row.slug || !row.title) {
+    redirect(adminErrorUrl('Save project failed — Project slug and title are required.'));
+  }
+
   const query = id ? db.from('portfolio_projects').update(row).eq('id', id) : db.from('portfolio_projects').insert(row);
   const { error } = await query;
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error('[CMS] saveProject failed', error);
+    redirectDbError('Save project failed', error);
+  }
+
   revalidatePath('/');
   revalidatePath('/work/' + row.slug);
   redirect('/admin?saved=project');
@@ -96,7 +135,10 @@ export async function deleteProject(formData: FormData) {
   const id = text(formData, 'id');
   if (!id) return;
   const { error } = await db.from('portfolio_projects').delete().eq('id', id);
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error('[CMS] deleteProject failed', error);
+    redirectDbError('Delete project failed', error);
+  }
   revalidatePath('/');
   revalidatePath('/work/[slug]', 'page');
   redirect('/admin?saved=deleted');
