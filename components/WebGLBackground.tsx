@@ -2,13 +2,13 @@
 
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 function ParticleField({ intensity }: { intensity: number }) {
   const points = useRef<THREE.Points>(null);
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    const count = 1500;
+    const count = 850;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i += 1) {
       const r = 2.8 + Math.pow(Math.random(), 0.65) * 5.5;
@@ -27,13 +27,12 @@ function ParticleField({ intensity }: { intensity: number }) {
     node.rotation.y += 0.0007 * intensity;
     node.rotation.x = THREE.MathUtils.lerp(node.rotation.x, pointer.y * 0.08, 0.025);
     node.rotation.z = THREE.MathUtils.lerp(node.rotation.z, pointer.x * -0.06, 0.025);
-    const material = node.material as THREE.PointsMaterial;
-    material.opacity = 0.16 + Math.sin(clock.elapsedTime * 0.55) * 0.025;
+    (node.material as THREE.PointsMaterial).opacity = 0.14 + Math.sin(clock.elapsedTime * 0.55) * 0.02;
   });
 
   return (
     <points ref={points} geometry={geometry}>
-      <pointsMaterial color="#d9ff64" size={0.024} transparent opacity={0.16} depthWrite={false} sizeAttenuation />
+      <pointsMaterial color="#d9ff64" size={0.024} transparent opacity={0.14} depthWrite={false} sizeAttenuation />
     </points>
   );
 }
@@ -47,8 +46,8 @@ function OrbitalRing({ radius, rotation, color, speed, dashed = false }: { radiu
   });
   return (
     <mesh ref={ref} rotation={rotation}>
-      <torusGeometry args={[radius, dashed ? 0.008 : 0.013, 12, 160]} />
-      <meshBasicMaterial color={color} transparent opacity={dashed ? 0.33 : 0.48} depthWrite={false} />
+      <torusGeometry args={[radius, dashed ? 0.008 : 0.013, 8, 96]} />
+      <meshBasicMaterial color={color} transparent opacity={dashed ? 0.28 : 0.42} depthWrite={false} />
     </mesh>
   );
 }
@@ -117,20 +116,16 @@ function Core({ intensity }: { intensity: number }) {
   return (
     <group ref={root}>
       <mesh ref={shell}>
-        <icosahedronGeometry args={[1.36, 5]} />
-        <meshPhysicalMaterial color="#cfe9a1" roughness={0.24} metalness={0.6} transmission={0.12} transparent opacity={0.17} wireframe />
+        <icosahedronGeometry args={[1.36, 3]} />
+        <meshBasicMaterial color="#cfe9a1" transparent opacity={0.18} wireframe />
       </mesh>
       <mesh ref={knot} scale={1.16}>
-        <torusKnotGeometry args={[1.04, 0.036, 220, 12, 2, 3]} />
+        <torusKnotGeometry args={[1.04, 0.036, 140, 8, 2, 3]} />
         <meshBasicMaterial color="#71efff" transparent opacity={0.33} />
       </mesh>
       <mesh scale={0.38}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial color="#d9ff64" transparent opacity={0.36} />
-      </mesh>
-      <mesh position={[0.7, 0.22, 0]}>
-        <sphereGeometry args={[0.07, 16, 16]} />
-        <meshBasicMaterial color="#a27bff" />
+        <sphereGeometry args={[1, 20, 20]} />
+        <meshBasicMaterial color="#d9ff64" transparent opacity={0.32} />
       </mesh>
       <OrbitalRing radius={1.72} rotation={[0.55, 0.25, 0.15]} color="#d9ff64" speed={0.18 * intensity} />
       <OrbitalRing radius={2.04} rotation={[1.06, -0.2, 0.4]} color="#71efff" speed={-0.12 * intensity} dashed />
@@ -145,9 +140,6 @@ function Core({ intensity }: { intensity: number }) {
 function Scene({ intensity }: { intensity: number }) {
   return (
     <>
-      <ambientLight intensity={0.34} />
-      <pointLight position={[2.2, 2.4, 4.2]} intensity={5.3} color="#d9ff64" distance={9} />
-      <pointLight position={[-4, -1.5, 2]} intensity={2.8} color="#744dff" distance={8} />
       <ParticleField intensity={intensity} />
       <Core intensity={intensity} />
     </>
@@ -155,16 +147,28 @@ function Scene({ intensity }: { intensity: number }) {
 }
 
 export function WebGLBackground({ intensity = 1 }: { intensity?: number }) {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    const coarse = matchMedia('(pointer: coarse)').matches;
+    const narrow = innerWidth < 900;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setEnabled(!coarse && !narrow && !reduced);
+  }, []);
+
+  if (!enabled) return null;
+
   return (
     <Canvas
-      dpr={[1, 1.5]}
+      dpr={[1, 1.15]}
       camera={{ position: [0, 0, 7.1], fov: 42 }}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
       className="hero-canvas"
+      frameloop="always"
       fallback={<div />}
       onCreated={({ gl }) => gl.setClearColor(new THREE.Color('#070808'), 0)}
     >
-      <Scene intensity={Math.max(0.45, Math.min(intensity, 1.7))} />
+      <Scene intensity={Math.max(0.45, Math.min(intensity, 1.35))} />
     </Canvas>
   );
 }
