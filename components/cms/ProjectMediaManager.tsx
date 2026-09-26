@@ -217,7 +217,6 @@ export default function ProjectMediaManager({ projectId, initialMedia }: Props) 
                     <button type="button" onClick={() => void move(index, -1)} disabled={busy || index === 0}>↑</button>
                     <button type="button" onClick={() => void move(index, 1)} disabled={busy || index === media.length - 1}>↓</button>
                   </div>
-                  </div>
                 </div>
                 <label>Alt / label<input value={item.alt} onChange={(event) => patch(item.id, { alt: event.target.value })} /></label>
                 <label>Caption<input value={item.caption ?? ''} onChange={(event) => patch(item.id, { caption: event.target.value })} /></label>
