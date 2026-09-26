@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { getPortfolioContent } from '@/lib/cms';
 import { DEFAULT_CONTENT, type ProjectMedia } from '@/lib/content';
 import { PageReveal, SiteCursor } from '@/components/SiteEffects';
+import ProjectMediaViewer from '@/components/ProjectMediaViewer';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,25 +20,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: item ? `${item.title} — Krish Sarkar` : 'Project — Krish Sarkar',
     description: item?.intro || DEFAULT_CONTENT.heroBody,
   };
-}
-
-function MediaVisual({ item, priority = false }: { item: ProjectMedia; priority?: boolean }) {
-  if (item.type === 'video') {
-    return (
-      <video
-        src={item.src}
-        poster={item.poster || undefined}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload={priority ? 'auto' : 'metadata'}
-        aria-label={item.alt}
-      />
-    );
-  }
-
-  return <img src={item.src} alt={item.alt} loading={priority ? 'eager' : 'lazy'} />;
 }
 
 function PlaceholderArt({ label }: { label: string }) {
@@ -114,8 +96,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         </section>
 
         <section className="project-hero-media-v4 shell" data-reveal>
-          <div className="project-media-frame project-media-frame--hero" data-cursor="image" data-cursor-label={heroMedia?.type === 'video' ? 'PLAY' : 'ZOOM'}>
-            {heroMedia ? <MediaVisual item={heroMedia} priority /> : <PlaceholderArt label={project.title} />}
+          <div className="project-media-frame project-media-frame--hero">
+            {heroMedia ? <ProjectMediaViewer item={heroMedia} priority className="project-media-viewer--hero" /> : <PlaceholderArt label={project.title} />}
             <div className="project-media-overlay">
               <span>{heroMedia?.type === 'video' ? 'LOOP / 01' : 'IMAGE / 01'}</span>
               <span>{project.title}</span>
@@ -147,7 +129,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                   data-cursor-label={item.type === 'video' ? 'PLAY' : 'ZOOM'}
                 >
                   <div className="project-media-frame">
-                    <MediaVisual item={item} />
+                    <ProjectMediaViewer item={item} />
                     <div className="project-media-overlay">
                       <span>{String(index + 1).padStart(2, '0')} / {item.type === 'video' ? 'LOOP' : 'IMAGE'}</span>
                       <span>{item.caption || item.alt}</span>
