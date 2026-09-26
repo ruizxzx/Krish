@@ -80,6 +80,24 @@ create table if not exists public.portfolio_socials (
   updated_at timestamptz not null default now()
 );
 
+-- Explicit privileges are required in addition to RLS policies.
+-- The public site reads through the publishable key; CMS writes happen server-side
+-- using the privileged service_role used by the Supabase secret key.
+
+grant usage on schema public to anon, authenticated, service_role;
+
+grant select on public.portfolio_site to anon, authenticated;
+grant select on public.portfolio_projects to anon, authenticated;
+grant select on public.portfolio_experience to anon, authenticated;
+grant select on public.portfolio_services to anon, authenticated;
+grant select on public.portfolio_socials to anon, authenticated;
+
+grant select, insert, update, delete on public.portfolio_site to service_role;
+grant select, insert, update, delete on public.portfolio_projects to service_role;
+grant select, insert, update, delete on public.portfolio_experience to service_role;
+grant select, insert, update, delete on public.portfolio_services to service_role;
+grant select, insert, update, delete on public.portfolio_socials to service_role;
+
 alter table public.portfolio_site enable row level security;
 alter table public.portfolio_projects enable row level security;
 alter table public.portfolio_experience enable row level security;
