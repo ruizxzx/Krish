@@ -27,7 +27,8 @@ create table if not exists public.portfolio_site (
   contact_email text not null default '',
   footer_note text not null default '',
   motion jsonb not null default '{"enabled":true,"intensity":1,"webgl":true}'::jsonb,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  profile_media jsonb not null default '{}'::jsonb
 );
 
 create table if not exists public.portfolio_projects (
@@ -86,6 +87,11 @@ create table if not exists public.portfolio_socials (
 -- using the privileged service_role used by the Supabase secret key.
 
 grant usage on schema public to anon, authenticated, service_role;
+
+
+-- Profile portrait stored in the portfolio-media bucket.
+alter table public.portfolio_site
+  add column if not exists profile_media jsonb not null default '{}'::jsonb;
 
 -- Project visual assets.
 alter table public.portfolio_projects
