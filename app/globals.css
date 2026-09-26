@@ -12,7 +12,7 @@ a{color:inherit;text-decoration:none}
 button,input,textarea{font:inherit}
 button{color:inherit}
 .shell{width:min(calc(100% - 80px),1480px);margin-inline:auto}
-.page-content{opacity:0;overflow:clip}
+.page-content{opacity:1;overflow:clip}
 .scroll-progress-bar{position:fixed;inset:0 0 auto;z-index:150;height:2px;background:var(--acid);transform:scaleX(0);transform-origin:left;box-shadow:0 0 22px #d9ff64;pointer-events:none}
 body:before{content:"";position:fixed;inset:0;z-index:140;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E")}
 
@@ -80,3 +80,11 @@ body:before{content:"";position:fixed;inset:0;z-index:140;pointer-events:none;op
 @media(max-width:1000px){.admin-shell{padding:35px 17px 80px}.admin-header{display:block;margin-bottom:45px}.admin-header-actions{margin-top:28px;flex-wrap:wrap}.admin-form-grid{grid-template-columns:1fr}.admin-form-grid .span-2{grid-column:auto}.admin-toggles{align-items:flex-start;display:grid}.admin-project summary{grid-template-columns:40px 1fr}.admin-project summary em{display:none}}
 @media(max-width:620px){.admin-login{padding:17px}.admin-login-card,.admin-card{padding:28px 20px}.admin-project summary strong{font-size:18px}.admin-row-actions{flex-direction:column;align-items:stretch}.admin-row-actions button{width:100%}}
 .error-page{min-height:100svh;padding:30px;display:grid;place-content:center;gap:25px;background:var(--bg);text-align:center}.error-page h1{margin:0;font-size:clamp(70px,11vw,160px);line-height:.74;letter-spacing:-.1em}.error-page h1 span{color:var(--acid)}.error-page a{font:9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:#aeb4aa}
+
+/* low-power/mobile rendering: preserve the art direction without forcing expensive compositing */
+@media (pointer: coarse){
+  body:before{display:none}
+  .hero-canvas{display:none!important}
+  .project-card-noise{display:none}
+  .hero-grid,.hero-orbit{opacity:.22}
+}
