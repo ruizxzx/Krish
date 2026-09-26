@@ -2264,3 +2264,45 @@ body:after{
     animation:none!important;
   }
 }
+
+
+/* CMS media drag-and-drop */
+.cms-media-index-actions{
+  display:flex!important;
+  align-items:center;
+  gap:4px;
+}
+.cms-media-drag{
+  width:30px;
+  height:26px;
+  padding:0;
+  border:1px solid var(--v4-line);
+  background:transparent;
+  display:grid;
+  grid-template-columns:repeat(2,3px);
+  grid-auto-rows:3px;
+  align-content:center;
+  justify-content:center;
+  gap:2px;
+  opacity:.65;
+  cursor:grab;
+}
+.cms-media-drag:active{cursor:grabbing}
+.cms-media-drag:disabled{opacity:.25;cursor:default}
+.cms-media-drag i{
+  display:block;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:var(--v4-ink);
+}
+.cms-media-card{
+  transition:opacity .25s,transform .25s,box-shadow .35s;
+}
+.cms-media-card.is-dragging{
+  opacity:.38;
+  transform:scale(.985);
+}
+.cms-media-card[draggable="true"]{
+  user-select:none;
+}
