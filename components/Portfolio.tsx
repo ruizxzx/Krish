@@ -139,10 +139,10 @@ function TiltCard({ project }: { project: Project }) {
     if (!el || !rect) return;
     const px = (pointer.current.x - rect.left) / rect.width - 0.5;
     const py = (pointer.current.y - rect.top) / rect.height - 0.5;
-    el.style.setProperty('--tilt-x', \`\${py * -5}deg\`);
-    el.style.setProperty('--tilt-y', \`\${px * 5}deg\`);
-    el.style.setProperty('--parallax-x', \`\${px * 18}px\`);
-    el.style.setProperty('--parallax-y', \`\${py * 18}px\`);
+    el.style.setProperty('--tilt-x', `${py * -5}deg`);
+    el.style.setProperty('--tilt-y', `${px * 5}deg`);
+    el.style.setProperty('--parallax-x', `${px * 18}px`);
+    el.style.setProperty('--parallax-y', `${py * 18}px`);
   };
 
   const move = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -174,7 +174,7 @@ function TiltCard({ project }: { project: Project }) {
   };
 
   return (
-    <Link href={\`/work/\${project.slug}\`} ref={ref} className={\`project-card project-card--\${project.accent}\`} data-cursor="project" data-cursor-label="VIEW" onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
+    <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label="VIEW" onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
 
 function ServiceRow({ item, index, active, onOpen }: { item: Service; index: number; active: number; onOpen: (next: number) => void }) {
   const isOpen = active === index;
