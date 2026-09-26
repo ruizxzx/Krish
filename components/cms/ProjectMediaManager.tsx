@@ -24,6 +24,7 @@ export default function ProjectMediaManager({ projectId, initialMedia }: Props) 
   const [media, setMedia] = useState<ProjectMedia[]>(initialMedia);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [draggedId, setDraggedId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const supabase = useMemo(() => createClient(), []);
 
@@ -93,6 +94,26 @@ export default function ProjectMediaManager({ projectId, initialMedia }: Props) 
     }
   };
 
+  const dropOn = async (targetIndex: number) => {
+    if (!draggedId) return;
+    const sourceIndex = media.findIndex((entry) => entry.id === draggedId);
+    if (sourceIndex < 0 || sourceIndex === targetIndex) {
+      setDraggedId(null);
+      return;
+    }
+
+    const next = [...media];
+    const [moved] = next.splice(sourceIndex, 1);
+    next.splice(sourceIndex < targetIndex ? targetIndex - 1 : targetIndex, 0, moved);
+    setDraggedId(null);
+
+    try {
+      await persist(next);
+    } catch {
+      // persist() restores the previous state and shows the error.
+    }
+  };
+
   const move = async (index: number, direction: -1 | 1) => {
     const nextIndex = index + direction;
     if (nextIndex < 0 || nextIndex >= media.length) return;
@@ -157,7 +178,15 @@ export default function ProjectMediaManager({ projectId, initialMedia }: Props) 
       ) : (
         <div className="cms-media-grid">
           {media.map((item, index) => (
-            <article className="cms-media-card" key={item.id}>
+            <article
+              className={`cms-media-card ${draggedId === item.id ? 'is-dragging' : ''}`}
+              key={item.id}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                void dropOn(index);
+              }}
+            >
               <div className="cms-media-preview">
                 {item.type === 'video'
                   ? <video src={item.src} muted loop playsInline autoPlay preload="metadata" />
@@ -168,7 +197,26 @@ export default function ProjectMediaManager({ projectId, initialMedia }: Props) 
               <div className="cms-media-card-body">
                 <div className="cms-media-index">
                   <span>{String(index + 1).padStart(2, '0')}</span>
-                  <div>
+                  <div className="cms-media-index-actions">
+                    <button
+                      type="button"
+                      className="cms-media-drag"
+                      draggable
+                      title="Drag to reorder"
+                      aria-label={`Drag ${item.alt || 'media'} to reorder`}
+                      onDragStart={(event) => {
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', item.id);
+                        setDraggedId(item.id);
+                      }}
+                      onDragEnd={() => setDraggedId(null)}
+                      disabled={busy}
+                    >
+                      <i /><i /><i />
+                    </button>
+                    <button type="button" onClick={() => void move(index, -1)} disabled={busy || index === 0}>↑</button>
+                    <button type="button" onClick={() => void move(index, 1)} disabled={busy || index === media.length - 1}>↓</button>
+                  </div>
                     <button type="button" onClick={() => void move(index, -1)} disabled={busy || index === 0}>↑</button>
                     <button type="button" onClick={() => void move(index, 1)} disabled={busy || index === media.length - 1}>↓</button>
                   </div>
