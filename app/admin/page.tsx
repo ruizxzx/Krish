@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { getPortfolioContent, portfolioAdminEmailHint, requirePortfolioAdmin, cmsAdminConfigured } from '@/lib/cms';
 import { getClaims } from '@/lib/supabase/server';
 import { deleteProject, logoutAction, saveProject, saveSite } from './actions';
+import ProjectMediaManager from '@/components/cms/ProjectMediaManager';
+import type { ProjectMedia } from '@/lib/content';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +79,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <label className="span-2">Case study sections (JSON)<textarea name="sections" defaultValue={JSON.stringify(project.sections ?? [], null, 2)} /></label>
                 <div className="admin-row-actions span-2"><button className="admin-submit" type="submit">Save project ↗</button><button className="admin-danger" type="submit" formAction={deleteProject}>Delete project</button></div>
               </form>
+              <ProjectMediaManager
+                projectId={String(project.id)}
+                initialMedia={Array.isArray(project.media) ? project.media as ProjectMedia[] : []}
+              />
             </details>
           ))}
         </div>
