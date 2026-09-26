@@ -19,9 +19,9 @@ type Props = { content: SiteContent };
 
 function SplitWord({ value, className = '' }: { value: string; className?: string }) {
   return (
-    <span className={\`split-word \${className}\`} aria-label={value}>
+    <span className={`split-word ${className}`} aria-label={value}>
       {value.split('').map((char, index) => (
-        <span className="split-char" key={\`\${char}-\${index}\`}>{char === ' ' ? '\u00A0' : char}</span>
+        <span className="split-char" key={`${char}-${index}`}>{char === ' ' ? '\u00A0' : char}</span>
       ))}
     </span>
   );
@@ -47,7 +47,7 @@ function Preloader({ onDone }: { onDone: () => void }) {
       <div className="preloader-top"><span>KRISH / 26</span><span>PORTFOLIO SYSTEM</span></div>
       <div className="preloader-center">
         <div className="preloader-word">K</div>
-        <div className="preloader-track"><span style={{ transform: \`scaleX(\${progress / 100})\` }} /><b>{progress}%</b></div>
+        <div className="preloader-track"><span style={{ transform: `scaleX(${progress / 100})` }} /><b>{progress}%</b></div>
       </div>
       <div className="preloader-bottom"><span>Loading visual engine</span><span>WebGL · GSAP · CMS</span></div>
     </div>
@@ -77,8 +77,8 @@ function Cursor() {
     const move = (event: globalThis.MouseEvent) => {
       tx = event.clientX;
       ty = event.clientY;
-      document.documentElement.style.setProperty('--pointer-x', \`\${event.clientX}px\`);
-      document.documentElement.style.setProperty('--pointer-y', \`\${event.clientY}px\`);
+      document.documentElement.style.setProperty('--pointer-x', `${event.clientX}px`);
+      document.documentElement.style.setProperty('--pointer-y', `${event.clientY}px`);
     };
 
     const over = (event: globalThis.MouseEvent) => {
@@ -94,8 +94,8 @@ function Cursor() {
       y += (ty - y) * 0.2;
       rx += (x - rx) * 0.08;
       ry += (y - ry) * 0.08;
-      dotEl.style.transform = \`translate3d(\${x}px,\${y}px,0)\`;
-      ringEl.style.transform = \`translate3d(\${rx}px,\${ry}px,0)\`;
+      dotEl.style.transform = `translate3d(${x}px,${y}px,0)`;
+      ringEl.style.transform = `translate3d(${rx}px,${ry}px,0)`;
       frame = requestAnimationFrame(loop);
     };
 
@@ -116,8 +116,8 @@ function Magnetic({ children, className = '', href = '#', target }: { children: 
     const rect = el.getBoundingClientRect();
     const x = event.clientX - (rect.left + rect.width / 2);
     const y = event.clientY - (rect.top + rect.height / 2);
-    el.style.setProperty('--mag-x', \`\${x * 0.18}px\`);
-    el.style.setProperty('--mag-y', \`\${y * 0.18}px\`);
+    el.style.setProperty('--mag-x', `${x * 0.18}px`);
+    el.style.setProperty('--mag-y', `${y * 0.18}px`);
   };
   const leave = () => {
     const el = ref.current;
@@ -125,7 +125,7 @@ function Magnetic({ children, className = '', href = '#', target }: { children: 
     el.style.setProperty('--mag-x', '0px');
     el.style.setProperty('--mag-y', '0px');
   };
-  return <a ref={ref} href={href} target={target} rel={target ? 'noreferrer' : undefined} onMouseMove={move} onMouseLeave={leave} className={\`magnetic \${className}\`} data-cursor="link">{children}</a>;
+  return <a ref={ref} href={href} target={target} rel={target ? 'noreferrer' : undefined} onMouseMove={move} onMouseLeave={leave} className={`magnetic ${className}`} data-cursor="link">{children}</a>;
 }
 
 function TiltCard({ project }: { project: Project }) {
@@ -137,10 +137,10 @@ function TiltCard({ project }: { project: Project }) {
     const rect = el.getBoundingClientRect();
     const px = (event.clientX - rect.left) / rect.width - 0.5;
     const py = (event.clientY - rect.top) / rect.height - 0.5;
-    el.style.setProperty('--tilt-x', \`\${py * -5}deg\`);
-    el.style.setProperty('--tilt-y', \`\${px * 5}deg\`);
-    el.style.setProperty('--parallax-x', \`\${px * 18}px\`);
-    el.style.setProperty('--parallax-y', \`\${py * 18}px\`);
+    el.style.setProperty('--tilt-x', `${py * -5}deg`);
+    el.style.setProperty('--tilt-y', `${px * 5}deg`);
+    el.style.setProperty('--parallax-x', `${px * 18}px`);
+    el.style.setProperty('--parallax-y', `${py * 18}px`);
   };
   const leave = () => {
     const el = ref.current;
@@ -152,7 +152,7 @@ function TiltCard({ project }: { project: Project }) {
   };
 
   return (
-    <Link href={\`/work/\${project.slug}\`} ref={ref} className={\`project-card project-card--\${project.accent}\`} data-cursor="project" data-cursor-label="VIEW" onMouseMove={move} onMouseLeave={leave}>
+    <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label="VIEW" onMouseMove={move} onMouseLeave={leave}>
       <div className="project-card-media">
         <div className="project-card-grid" />
         <div className="project-card-noise" />
@@ -174,7 +174,7 @@ function TiltCard({ project }: { project: Project }) {
 function ServiceRow({ item, index, active, onOpen }: { item: Service; index: number; active: number; onOpen: (next: number) => void }) {
   const isOpen = active === index;
   return (
-    <button type="button" className={\`service-row \${isOpen ? 'is-open' : ''}\`} onClick={() => onOpen(isOpen ? -1 : index)} aria-expanded={isOpen}>
+    <button type="button" className={`service-row ${isOpen ? 'is-open' : ''}`} onClick={() => onOpen(isOpen ? -1 : index)} aria-expanded={isOpen}>
       <span className="service-index">{item.index}</span>
       <span className="service-main"><strong>{item.title}</strong><span className="service-tags">{item.tags.map((tag) => <em key={tag}>{tag}</em>)}</span></span>
       <span className="service-toggle">{isOpen ? '−' : '+'}</span>
@@ -260,18 +260,18 @@ export function Portfolio({ content }: Props) {
       {!ready && <Preloader onDone={done} />}
       <Cursor />
       <div className="scroll-progress-bar" aria-hidden="true" />
-      <header className={\`site-nav \${menuOpen ? 'is-open' : ''}\`}>
+      <header className={`site-nav ${menuOpen ? 'is-open' : ''}`}>
         <div className="nav-left"><a href="#top" className="nav-logo">{content.displayName}</a><span className="nav-role">{content.navLabel}</span></div>
         <nav className="nav-desktop" aria-label="Primary navigation">
-          {['work', 'about', 'services', 'contact'].map((item) => <a key={item} href={\`#\${item}\`} data-cursor="link">{item}</a>)}
+          {['work', 'about', 'services', 'contact'].map((item) => <a key={item} href={`#${item}`} data-cursor="link">{item}</a>)}
         </nav>
         <div className="nav-right"><span className="nav-availability"><i /> {content.availability}</span><button className="nav-menu" type="button" onClick={() => setMenuOpen((value) => !value)} aria-expanded={menuOpen}><span>{menuOpen ? 'Close' : 'Menu'}</span><i /><i /></button></div>
       </header>
-      <div className={\`menu-panel \${menuOpen ? 'is-open' : ''}\`} aria-hidden={!menuOpen}>
+      <div className={`menu-panel ${menuOpen ? 'is-open' : ''}`} aria-hidden={!menuOpen}>
         <div className="menu-panel-inner">
           <span className="menu-label">Navigation / 00</span>
           <div className="menu-links">
-            {['work', 'about', 'services', 'contact'].map((item, index) => <a key={item} href={\`#\${item}\`} onClick={closeMenu}><b>0{index + 1}</b><span>{item}</span><em>↗</em></a>)}
+            {['work', 'about', 'services', 'contact'].map((item, index) => <a key={item} href={`#${item}`} onClick={closeMenu}><b>0{index + 1}</b><span>{item}</span><em>↗</em></a>)}
           </div>
           <div className="menu-bottom"><span>{content.location}</span><span>{content.heroMeta}</span></div>
         </div>
@@ -361,7 +361,7 @@ export function Portfolio({ content }: Props) {
           <div className="contact-glow" />
           <div className="shell contact-inner">
             <div className="section-head"><span>{content.contactKicker}</span><span>Open channel</span></div>
-            <div className="contact-content"><p className="micro">{content.contactBody}</p><a href={\`mailto:\${content.contactEmail}\`} className="contact-title" data-cursor="project" data-cursor-label="MAIL">{content.contactTitle.split(' ').map((word, index) => <span key={\`\${word}-\${index}\`}>{word}</span>)}</a><div className="contact-bottom"><Magnetic href={\`mailto:\${content.contactEmail}\`} className="contact-email">{content.contactEmail}<b>↗</b></Magnetic><div className="socials">{content.socials.map((social) => <a key={social.id} href={social.url} target="_blank" rel="noreferrer" data-cursor="link">{social.label}<span>↗</span></a>)}</div></div></div>
+            <div className="contact-content"><p className="micro">{content.contactBody}</p><a href={`mailto:${content.contactEmail}`} className="contact-title" data-cursor="project" data-cursor-label="MAIL">{content.contactTitle.split(' ').map((word, index) => <span key={`${word}-${index}`}>{word}</span>)}</a><div className="contact-bottom"><Magnetic href={`mailto:${content.contactEmail}`} className="contact-email">{content.contactEmail}<b>↗</b></Magnetic><div className="socials">{content.socials.map((social) => <a key={social.id} href={social.url} target="_blank" rel="noreferrer" data-cursor="link">{social.label}<span>↗</span></a>)}</div></div></div>
           </div>
         </section>
 
