@@ -4,6 +4,7 @@ import { getClaims } from '@/lib/supabase/server';
 import { deleteProject, logoutAction, saveProject, saveSite } from './actions';
 import ProjectMediaManager from '@/components/cms/ProjectMediaManager';
 import type { ProjectMedia } from '@/lib/content';
+import { SiteCursor } from '@/components/SiteEffects';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const projectRows = projectsError ? content.projects : (projects ?? content.projects);
 
   return (
-    <main className="admin-shell">
+    <>
+      <SiteCursor />
+      <main className="admin-shell">
       <header className="admin-header">
         <div><div className="admin-eyebrow">KRISH / CONTENT STUDIO</div><h1>Control the<br/><span>experience.</span></h1></div>
         <div className="admin-header-actions"><span>{email}</span><a href="/">View live ↗</a><form action={logoutAction}><button type="submit">Sign out</button></form></div>
@@ -107,6 +110,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </form>
         </details>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
