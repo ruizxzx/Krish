@@ -210,6 +210,36 @@ export function PageReveal({ children }: { children: ReactNode }) {
         );
       });
 
+      gsap.utils.toArray<HTMLElement>('.project-media-frame').forEach((frame) => {
+        gsap.fromTo(
+          frame,
+          { clipPath: 'inset(8% 8% 8% 8%)', scale: 0.96, y: 45 },
+          {
+            clipPath: 'inset(0% 0% 0% 0%)',
+            scale: 1,
+            y: 0,
+            duration: 1.15,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: frame, start: 'top 92%', once: true },
+          }
+        );
+
+        const visual = frame.querySelector<HTMLElement>('img, video');
+        if (visual) {
+          gsap.fromTo(
+            visual,
+            { scale: 1.1, xPercent: -1 },
+            {
+              scale: 1,
+              xPercent: 0,
+              duration: 1.3,
+              ease: 'power3.out',
+              scrollTrigger: { trigger: frame, start: 'top 92%', once: true },
+            }
+          );
+        }
+      });
+
       gsap.utils.toArray<HTMLElement>('[data-line]').forEach((item) => {
         gsap.fromTo(
           item,
