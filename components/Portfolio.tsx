@@ -139,10 +139,10 @@ function TiltCard({ project }: { project: Project }) {
     if (!el || !rect) return;
     const px = (pointer.current.x - rect.left) / rect.width - 0.5;
     const py = (pointer.current.y - rect.top) / rect.height - 0.5;
-    el.style.setProperty('--tilt-x', '${py * -5}deg');
-    el.style.setProperty('--tilt-y', '${px * 5}deg');
-    el.style.setProperty('--parallax-x', '${px * 18}px');
-    el.style.setProperty('--parallax-y', '${py * 18}px');
+    el.style.setProperty('--tilt-x', `${py * -5}deg`);
+    el.style.setProperty('--tilt-y', `${px * 5}deg`);
+    el.style.setProperty('--parallax-x', `${px * 18}px`);
+    el.style.setProperty('--parallax-y', `${py * 18}px`);
   };
 
   const move = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -174,7 +174,7 @@ function TiltCard({ project }: { project: Project }) {
   };
 
   return (
-    <Link href="/work/${project.slug}" ref={ref} className="project-card project-card--${project.accent}" data-cursor="project" data-cursor-label="VIEW" onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
+    <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label="VIEW" onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
       <div className="project-card-media">
         <div className="project-card-grid" />
         <div className="project-card-noise" />
@@ -182,12 +182,12 @@ function TiltCard({ project }: { project: Project }) {
         <div className="project-card-orbit project-card-orbit--two" />
         <div className="project-card-core"><span /></div>
         <div className="project-card-scan" />
-        <span className="project-card-code">${project.metricLabel} / ${project.metricValue}</span>
-        <span className="project-card-index">${project.index}</span>
+        <span className="project-card-code">{project.metricLabel} / {project.metricValue}</span>
+        <span className="project-card-index">{project.index}</span>
       </div>
       <div className="project-card-info">
-        <div className="project-card-heading"><span>${project.eyebrow}</span><h3>${project.title}</h3></div>
-        <div className="project-card-meta"><p>${project.short}</p><span>${project.year} <b>↗</b></span></div>
+        <div className="project-card-heading"><span>{project.eyebrow}</span><h3>{project.title}</h3></div>
+        <div className="project-card-meta"><p>{project.short}</p><span>{project.year} <b>↗</b></span></div>
       </div>
     </Link>
   );
@@ -215,10 +215,11 @@ export function Portfolio({ content }: Props) {
 
   useEffect(() => {
     if (!ready) return;
+    const isCoarse = matchMedia('(pointer: coarse)').matches;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || !content.motion.enabled;
     document.documentElement.dataset.motion = reduce ? 'reduced' : 'full';
 
-    const lenis = reduce ? null : new Lenis({ duration: 1.15, smoothWheel: true, syncTouch: true, lerp: 0.075 });
+    const lenis = reduce || isCoarse ? null : new Lenis({ duration: 1.15, smoothWheel: true, syncTouch: false, lerp: 0.075 });
     let raf = 0;
     if (lenis) {
       lenis.on('scroll', () => ScrollTrigger.update());
@@ -231,7 +232,7 @@ export function Portfolio({ content }: Props) {
 
     const ctx = gsap.context(() => {
       gsap.set('.page-content', { opacity: 1 });
-      if (reduce) {
+      if (reduce || isCoarse) {
         gsap.set('[data-reveal], .split-char, .hero-orbit, .hero-visual', { opacity: 1, y: 0, rotateX: 0, scale: 1, x: 0 });
       } else {
         gsap.timeline({ defaults: { ease: 'power4.out' } })
