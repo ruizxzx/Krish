@@ -82,6 +82,21 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
 
+          <div className="project-live-bar shell" data-page-intro>
+            {project.liveUrl ? (
+              <a href={project.liveUrl} target="_blank" rel="noreferrer" className="project-live-link" data-cursor="link" data-cursor-label="OPEN LIVE">
+                <span>Live project</span>
+                <strong>Open experience ↗</strong>
+              </a>
+            ) : (
+              <div className="project-live-link project-live-link--disabled">
+                <span>Live project</span>
+                <strong>Link coming soon</strong>
+              </div>
+            )}
+            <span className="project-live-hint">Launches in a new tab</span>
+          </div>
+
           <div className="project-intro-foot shell">
             <div className="project-meta-grid" data-page-intro>
               {[
