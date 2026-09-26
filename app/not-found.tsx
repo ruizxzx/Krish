@@ -1,2 +1,5 @@
 import Link from 'next/link';
-export default function NotFound(){return <main className="error-page"><p className="eyebrow">404 / not found</p><h1>That page slipped into the void.</h1><Link className="button" href="/">Return home ↗</Link></main>}
+
+export default function NotFound() {
+  return <main className="error-page"><span className="micro">KRISH / 404</span><h1>Lost in the<br/><span>interface.</span></h1><Link href="/">Return home ↗</Link></main>;
+}
