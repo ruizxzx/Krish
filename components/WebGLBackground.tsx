@@ -52,11 +52,11 @@ function Core() {
     group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, pointer.x * .34 + t * .09, .035);
     group.current.position.x = THREE.MathUtils.lerp(group.current.position.x, pointer.x * .35, .03);
     group.current.position.y = THREE.MathUtils.lerp(group.current.position.y, pointer.y * -.25 + Math.sin(t * .65) * .12, .03);
-    shell.rotation.z += delta * .16;
-    wire.rotation.x -= delta * .12;
-    wire.rotation.y += delta * .19;
+    shell.current.rotation.z += delta * .16;
+    wire.current.rotation.x -= delta * .12;
+    wire.current.rotation.y += delta * .19;
     const pulse = 1 + Math.sin(t * 1.15) * .035;
-    shell.scale.setScalar(pulse);
+    shell.current.scale.setScalar(pulse);
   });
 
   return (
