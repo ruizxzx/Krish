@@ -4,6 +4,7 @@ import { getClaims } from '@/lib/supabase/server';
 import { deleteProject, logoutAction, saveProject, saveSite } from './actions';
 import ProjectMediaManager from '@/components/cms/ProjectMediaManager';
 import type { ProjectMedia } from '@/lib/content';
+import ProfilePhotoManager from '@/components/cms/ProfilePhotoManager';
 import { SiteCursor } from '@/components/SiteEffects';
 
 export const dynamic = 'force-dynamic';
@@ -62,6 +63,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <label>Intensity<input name="motion_intensity" type="number" min="0.45" max="1.7" step="0.05" defaultValue={content.motion.intensity} /></label>
           </div>
           <button className="admin-submit span-2" type="submit">Save site system ↗</button>
+          <ProfilePhotoManager initialMedia={content.profileMedia} />
         </form>
       </section>
 
