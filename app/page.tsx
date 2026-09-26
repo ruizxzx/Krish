@@ -1,2 +1,9 @@
 import { Portfolio } from '@/components/Portfolio';
-export default function Page(){ return <Portfolio/>; }
+import { getPortfolioContent } from '@/lib/cms';
+
+export const revalidate = 60;
+
+export default async function Page() {
+  const content = await getPortfolioContent();
+  return <Portfolio content={content} />;
+}
