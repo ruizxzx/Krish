@@ -1,9 +1,12 @@
 import { loginAction } from './actions';
+import { SiteCursor } from '@/components/SiteEffects';
 
 export default async function AdminLogin({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return (
-    <main className="admin-login">
+    <>
+      <SiteCursor />
+      <main className="admin-login">
       <div className="admin-login-card">
         <div className="admin-eyebrow">KRISH / CMS</div>
         <h1>Content<br/><span>Studio.</span></h1>
@@ -18,6 +21,7 @@ export default async function AdminLogin({ searchParams }: { searchParams: Promi
         </form>
         <a className="admin-back" href="/">← Back to site</a>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
