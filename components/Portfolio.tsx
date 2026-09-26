@@ -77,8 +77,6 @@ function Cursor() {
     const move = (event: globalThis.MouseEvent) => {
       tx = event.clientX;
       ty = event.clientY;
-      document.documentElement.style.setProperty('--pointer-x', `${event.clientX}px`);
-      document.documentElement.style.setProperty('--pointer-y', `${event.clientY}px`);
     };
 
     const over = (event: globalThis.MouseEvent) => {
@@ -130,19 +128,43 @@ function Magnetic({ children, className = '', href = '#', target }: { children: 
 
 function TiltCard({ project }: { project: Project }) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const frame = useRef<number | null>(null);
+  const pointer = useRef({ x: 0, y: 0 });
+  const bounds = useRef<DOMRect | null>(null);
+
+  const apply = () => {
+    frame.current = null;
+    const el = ref.current;
+    const rect = bounds.current;
+    if (!el || !rect) return;
+    const px = (pointer.current.x - rect.left) / rect.width - 0.5;
+    const py = (pointer.current.y - rect.top) / rect.height - 0.5;
+    el.style.setProperty('--tilt-x', \`\${py * -5}deg\`);
+    el.style.setProperty('--tilt-y', \`\${px * 5}deg\`);
+    el.style.setProperty('--parallax-x', \`\${px * 18}px\`);
+    el.style.setProperty('--parallax-y', \`\${py * 18}px\`);
+  };
+
   const move = (event: MouseEvent<HTMLAnchorElement>) => {
     if (window.matchMedia('(pointer: coarse)').matches) return;
     const el = ref.current;
     if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const px = (event.clientX - rect.left) / rect.width - 0.5;
-    const py = (event.clientY - rect.top) / rect.height - 0.5;
-    el.style.setProperty('--tilt-x', `${py * -5}deg`);
-    el.style.setProperty('--tilt-y', `${px * 5}deg`);
-    el.style.setProperty('--parallax-x', `${px * 18}px`);
-    el.style.setProperty('--parallax-y', `${py * 18}px`);
+    if (!bounds.current) bounds.current = el.getBoundingClientRect();
+    pointer.current.x = event.clientX;
+    pointer.current.y = event.clientY;
+    if (frame.current === null) frame.current = requestAnimationFrame(apply);
   };
+
+  const enter = () => {
+    const el = ref.current;
+    if (!el) return;
+    bounds.current = el.getBoundingClientRect();
+  };
+
   const leave = () => {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    bounds.current = null;
     const el = ref.current;
     if (!el) return;
     el.style.setProperty('--tilt-x', '0deg');
@@ -152,24 +174,7 @@ function TiltCard({ project }: { project: Project }) {
   };
 
   return (
-    <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label="VIEW" onMouseMove={move} onMouseLeave={leave}>
-      <div className="project-card-media">
-        <div className="project-card-grid" />
-        <div className="project-card-noise" />
-        <div className="project-card-orbit project-card-orbit--one" />
-        <div className="project-card-orbit project-card-orbit--two" />
-        <div className="project-card-core"><span /></div>
-        <div className="project-card-scan" />
-        <span className="project-card-code">{project.metricLabel} / {project.metricValue}</span>
-        <span className="project-card-index">{project.index}</span>
-      </div>
-      <div className="project-card-info">
-        <div className="project-card-heading"><span>{project.eyebrow}</span><h3>{project.title}</h3></div>
-        <div className="project-card-meta"><p>{project.short}</p><span>{project.year} <b>↗</b></span></div>
-      </div>
-    </Link>
-  );
-}
+    <Link href={\`/work/\${project.slug}\`} ref={ref} className={\`project-card project-card--\${project.accent}\`} data-cursor="project" data-cursor-label="VIEW" onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
 
 function ServiceRow({ item, index, active, onOpen }: { item: Service; index: number; active: number; onOpen: (next: number) => void }) {
   const isOpen = active === index;
