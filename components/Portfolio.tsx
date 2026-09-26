@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import type { Project, SiteContent, Service } from '@/lib/content';
+import { SiteCursor } from '@/components/SiteEffects';
 
 const WebGLBackground = dynamic(() => import('./WebGLBackground').then((m) => m.WebGLBackground), {
   ssr: false,
@@ -54,57 +55,7 @@ function Preloader({ onDone }: { onDone: () => void }) {
   );
 }
 
-function Cursor() {
-  const dot = useRef<HTMLDivElement>(null);
-  const ring = useRef<HTMLDivElement>(null);
-  const label = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    const dotEl = dot.current;
-    const ringEl = ring.current;
-    const labelEl = label.current;
-    if (!dotEl || !ringEl || !labelEl) return;
-
-    let x = innerWidth * 0.5;
-    let y = innerHeight * 0.5;
-    let tx = x;
-    let ty = y;
-    let rx = x;
-    let ry = y;
-    let frame = 0;
-
-    const move = (event: globalThis.MouseEvent) => {
-      tx = event.clientX;
-      ty = event.clientY;
-    };
-
-    const over = (event: globalThis.MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const owner = target?.closest<HTMLElement>('[data-cursor]');
-      const state = owner?.dataset.cursor || 'default';
-      ringEl.dataset.state = state;
-      labelEl.textContent = owner?.dataset.cursorLabel || (state === 'project' ? 'OPEN' : state === 'drag' ? 'DRAG' : state === 'link' ? 'GO' : '');
-    };
-
-    const loop = () => {
-      x += (tx - x) * 0.2;
-      y += (ty - y) * 0.2;
-      rx += (x - rx) * 0.08;
-      ry += (y - ry) * 0.08;
-      dotEl.style.transform = `translate3d(${x}px,${y}px,0)`;
-      ringEl.style.transform = `translate3d(${rx}px,${ry}px,0)`;
-      frame = requestAnimationFrame(loop);
-    };
-
-    addEventListener('mousemove', move, { passive: true });
-    addEventListener('mouseover', over, { passive: true });
-    frame = requestAnimationFrame(loop);
-    return () => { removeEventListener('mousemove', move); removeEventListener('mouseover', over); cancelAnimationFrame(frame); };
-  }, []);
-
-  return <><div ref={dot} className="cursor-dot" /><div ref={ring} className="cursor-ring"><span ref={label}>GO</span></div></>;
-}
+function Cursor() { return null; }
 
 function Magnetic({ children, className = '', href = '#', target }: { children: ReactNode; className?: string; href?: string; target?: string }) {
   const ref = useRef<HTMLAnchorElement>(null);
@@ -281,7 +232,7 @@ export function Portfolio({ content }: Props) {
   return (
     <>
       {!ready && <Preloader onDone={done} />}
-      <Cursor />
+      <SiteCursor />
       <div className="scroll-progress-bar" aria-hidden="true" />
       <header className={`site-nav ${menuOpen ? 'is-open' : ''}`}>
         <div className="nav-left"><a href="#top" className="nav-logo">{content.displayName}</a><span className="nav-role">{content.navLabel}</span></div>
@@ -301,34 +252,31 @@ export function Portfolio({ content }: Props) {
       </div>
 
       <main ref={root} id="top" className="page-content">
-        <section className="hero" id="home">
+        <section className="hero hero--brutal" id="home">
           {content.motion.webgl && <WebGLBackground intensity={content.motion.intensity} />}
-          <div className="hero-vignette" />
-          <div className="hero-grid" />
-          <div className="hero-orbit" aria-hidden="true"><span /><span /><span /></div>
-          <div className="hero-side-rail"><span>Creative developer</span><span>Scroll / 01</span></div>
-          <div className="hero-shell shell">
-            <div className="hero-kicker"><span>{content.heroKicker}</span><span>{content.location}</span></div>
-            <div className="hero-layout">
-              <div className="hero-copy-block">
-                <h1 className="hero-title" aria-label={content.heroTitle.join(' ')}>
-                  <span className="hero-line"><SplitWord value={content.heroTitle[0]} /></span>
-                  <span className="hero-line hero-line--outline"><SplitWord value={content.heroTitle[1]} /></span>
-                  <span className="hero-line"><SplitWord value={content.heroTitle[2]} className="hero-acid" /></span>
-                </h1>
-                <div className="hero-copy" data-reveal>
-                  <p>{content.heroBody}</p>
-                  <span>{content.heroMeta}</span>
-                </div>
-                <div className="hero-actions" data-reveal>
-                  <Magnetic href="#work" className="round-cta"><span>Enter<br/>projects</span><b>↘</b></Magnetic>
-                  <div className="hero-status"><span className="status-dot" /> {content.availability}</div>
-                </div>
-              </div>
-              <div className="hero-visual" data-cursor="drag" data-cursor-label="DRAG"><div className="hero-visual-frame"><div className="hero-visual-top"><span>R3F / 001</span><span>LIVE</span></div><div className="hero-visual-center"><div className="hero-visual-ring hero-visual-ring--a" /><div className="hero-visual-ring hero-visual-ring--b" /><div className="hero-visual-core"><i /></div></div><div className="hero-visual-bottom"><span>Move pointer</span><span>Scroll object</span></div></div></div>
-            </div>
-            <div className="hero-bottom"><span>02.9° N / 88.3° E</span><div /><span>Explore ↓</span></div>
+          <div className="brutal-noise" aria-hidden="true" />
+          <div className="brutal-grid" aria-hidden="true" />
+          <div className="brutal-cross brutal-cross--a" aria-hidden="true">+</div>
+          <div className="brutal-cross brutal-cross--b" aria-hidden="true">+</div>
+          <div className="hero-brutal-top shell">
+            <span data-page-intro>01 / independent developer</span>
+            <span data-page-intro>{content.location}</span>
+            <span data-page-intro>{content.availability}</span>
           </div>
+          <div className="hero-brutal-main shell">
+            <div className="hero-brutal-label" data-page-intro>Selected work / 2026</div>
+            <h1 className="hero-brutal-title" aria-label="Krish Sarkar">
+              <span data-page-intro>KRISH</span>
+              <span className="hero-brutal-outline" data-page-intro>SARKAR<span className="hero-brutal-dot">.</span></span>
+            </h1>
+            <div className="hero-brutal-bottom">
+              <div className="hero-brutal-statement" data-page-intro>
+                <p>{content.heroBody}</p><span>{content.heroMeta}</span>
+              </div>
+              <a href="#work" className="hero-brutal-enter" data-cursor="link" data-cursor-label="ENTER" data-page-intro><span>Enter the work</span><b>↓</b></a>
+            </div>
+          </div>
+          <div className="hero-brutal-edge shell"><span>Creative developer / product builder</span><span>Scroll to explore</span></div>
         </section>
 
         <div className="ticker"><div>{content.marquee}</div></div>
