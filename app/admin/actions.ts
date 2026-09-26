@@ -135,6 +135,32 @@ export async function saveProject(formData: FormData) {
   redirect('/admin?saved=project');
 }
 
+export async function saveProfileMedia(media: { src: string; path?: string; alt?: string } | null) {
+  try {
+    const db = await requirePortfolioAdmin();
+    const value = media?.src
+      ? {
+          src: String(media.src),
+          path: media.path ? String(media.path) : '',
+          alt: String(media.alt ?? 'Krish Sarkar'),
+        }
+      : null;
+
+    const { error } = await db
+      .from('portfolio_site')
+      .update({ profile_media: value, updated_at: new Date().toISOString() })
+      .eq('id', 'default');
+
+    if (error) throw error;
+    revalidatePath('/');
+    revalidatePath('/admin');
+    return { ok: true as const };
+  } catch (error) {
+    console.error('[CMS] saveProfileMedia failed', error);
+    return { ok: false as const, error: 'Save profile photo failed — ' + describeError(error) };
+  }
+}
+
 export async function saveProjectMedia(projectId: string, media: ProjectMedia[]) {
   try {
     if (!projectId) throw new Error('Project id is required.');
