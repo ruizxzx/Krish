@@ -8,6 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import type { Project, SiteContent, Service } from '@/lib/content';
 import { SiteCursor } from '@/components/SiteEffects';
+import LiquidPortrait from '@/components/LiquidPortrait';
 
 const WebGLBackground = dynamic(() => import('./WebGLBackground').then((m) => m.WebGLBackground), {
   ssr: false,
@@ -399,7 +400,14 @@ export function Portfolio({ content }: Props) {
             <div className="section-head"><span>{content.aboutKicker}</span><span>Engineer × art direction</span></div>
             <div className="about-grid">
               <div className="identity-card" data-reveal data-cursor="drag">
-                <div className="identity-scan" /><div className="identity-top"><span>KRISH / 26</span><span>IDENTITY_01</span></div><div className="identity-mark"><span>K</span><i /><i /><i /></div><div className="identity-bottom"><span>Creative developer</span><span>{content.location}</span></div>
+                <div className="identity-scan" />
+                <div className="identity-top"><span>KRISH / 26</span><span>IDENTITY_01</span></div>
+                {content.profileMedia?.src ? (
+                  <LiquidPortrait src={content.profileMedia.src} alt={content.profileMedia.alt} />
+                ) : (
+                  <div className="identity-mark"><span>K</span><i /><i /><i /></div>
+                )}
+                <div className="identity-bottom"><span>Creative developer</span><span>{content.location}</span></div>
               </div>
               <div className="about-copy"><p className="micro" data-reveal>04 / about</p><h2 className="display-heading" data-reveal>{content.aboutTitle}</h2><p className="about-lead" data-reveal>{content.aboutBody}</p><div className="experience-list" data-reveal>{content.experience.map((item) => <article key={item.id}><span>{item.year}</span><div><h3>{item.company}</h3><strong>{item.role}</strong><p>{item.description}</p></div></article>)}</div></div>
             </div>
