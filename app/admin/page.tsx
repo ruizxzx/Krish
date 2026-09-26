@@ -5,7 +5,7 @@ import { deleteProject, logoutAction, saveProject, saveSite } from './actions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
   const claims = await getClaims();
   if (!claims) redirect('/admin/login');
   const email = typeof claims.email === 'string' ? claims.email : '';
@@ -15,8 +15,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   const db = await requirePortfolioAdmin();
   const content = await getPortfolioContent();
-  const { saved } = await searchParams;
-  const { data: projects } = await db.from('portfolio_projects').select('*').order('sort_index', { ascending: true });
+  const { saved, error } = await searchParams;
+  const { data: projects, error: projectsError } = await db.from('portfolio_projects').select('*').order('sort_index', { ascending: true });
 
   const siteValues: Record<string, string> = {
     display_name: content.displayName, nav_label: content.navLabel, hero_kicker: content.heroKicker,
@@ -27,6 +27,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     contact_title: content.contactTitle, contact_email: content.contactEmail, footer_note: content.footerNote,
   };
 
+  const projectRows = projectsError ? content.projects : (projects ?? content.projects);
+
   return (
     <main className="admin-shell">
       <header className="admin-header">
@@ -34,6 +36,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <div className="admin-header-actions"><span>{email}</span><a href="/">View live ↗</a><form action={logoutAction}><button type="submit">Sign out</button></form></div>
       </header>
       {saved && <div className="admin-saved">Saved / {saved}</div>}
+      {error && <div className="admin-error" role="alert"><strong>CMS error</strong><span>{error}</span></div>}
+      {projectsError && !error && <div className="admin-error" role="alert"><strong>Project data error</strong><span>{projectsError.message}</span></div>}
 
       <section className="admin-section">
         <div className="admin-section-head"><span>01 / site settings</span><span>Live front-end content</span></div>
@@ -59,7 +63,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       <section className="admin-section">
         <div className="admin-section-head"><span>02 / projects</span><span>CRUD + case studies</span></div>
         <div className="admin-projects">
-          {(projects ?? content.projects).map((project: Record<string, unknown>) => (
+          {projectRows.map((project: Record<string, unknown>) => (
             <details className="admin-project" key={String(project.id)}>
               <summary><span>{String(project.sort_index ?? 0).padStart(2,'0')}</span><strong>{String(project.title)}</strong><em>{String(project.status)}</em></summary>
               <form action={saveProject} className="admin-form admin-form-grid">
