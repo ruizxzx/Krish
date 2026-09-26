@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { DEFAULT_CONTENT, type SiteContent, type Project, type Accent } from '@/lib/content';
+import { DEFAULT_CONTENT, type SiteContent, type Project, type Accent, type ProfileMedia } from '@/lib/content';
 
 const isConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 
@@ -62,6 +62,22 @@ export async function getPortfolioContent(): Promise<SiteContent> {
       sections: Array.isArray(p.sections) ? p.sections as Project['sections'] : [],
     }));
 
+    const profileMedia: ProfileMedia | undefined =
+      site?.profile_media &&
+      typeof site.profile_media === 'object' &&
+      !Array.isArray(site.profile_media) &&
+      typeof (site.profile_media as Record<string, unknown>).src === 'string'
+        ? {
+            src: String((site.profile_media as Record<string, unknown>).src),
+            path: typeof (site.profile_media as Record<string, unknown>).path === 'string'
+              ? String((site.profile_media as Record<string, unknown>).path)
+              : undefined,
+            alt: typeof (site.profile_media as Record<string, unknown>).alt === 'string'
+              ? String((site.profile_media as Record<string, unknown>).alt)
+              : 'Krish Sarkar',
+          }
+        : undefined;
+
     return {
       ...DEFAULT_CONTENT,
       ...(site ? {
@@ -78,6 +94,7 @@ export async function getPortfolioContent(): Promise<SiteContent> {
         contactTitle: String(site.contact_title ?? DEFAULT_CONTENT.contactTitle), contactBody: String(site.contact_body ?? DEFAULT_CONTENT.contactBody),
         contactEmail: String(site.contact_email ?? DEFAULT_CONTENT.contactEmail), footerNote: String(site.footer_note ?? DEFAULT_CONTENT.footerNote),
         motion: { ...DEFAULT_CONTENT.motion, ...(site.motion ?? {}) },
+        profileMedia,
       } : {}),
       projects: mappedProjects,
       experience: (experience?.length ? experience : DEFAULT_CONTENT.experience).map((x: Record<string, unknown>, i: number) => ({
