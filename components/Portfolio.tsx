@@ -149,6 +149,7 @@ function ProjectHoverMedia({ project }: { project: Project }) {
       onMouseLeave={leave}
       aria-hidden="true"
     >
+      <span className="project-card-liquid" aria-hidden="true" />
       <div className="project-card-gallery">
         {media.map((item, index) => (
           <div key={item.id} className={`project-card-gallery-item ${index === active ? 'is-active' : ''}`}>
