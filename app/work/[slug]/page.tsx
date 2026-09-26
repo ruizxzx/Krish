@@ -60,6 +60,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
   const media = project.media ?? [];
   const heroMedia = media.find((item) => item.featured) ?? media[0];
+  const sequenceMedia = heroMedia ? media.filter((item) => item.id !== heroMedia.id) : media;
   const projectIndex = content.projects.findIndex((item) => item.slug === project.slug);
   const nextProject = content.projects[(projectIndex + 1) % content.projects.length];
 
@@ -135,9 +136,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             <span>{media.length.toString().padStart(2, '0')} assets</span>
           </div>
 
-          {media.length > 0 ? (
+          {sequenceMedia.length > 0 ? (
             <div className="project-media-sequence">
-              {media.map((item, index) => (
+              {sequenceMedia.map((item, index) => (
                 <figure
                   className={`project-media-block project-media-block--${index % 2 === 0 ? 'wide' : 'offset'}`}
                   key={item.id}
