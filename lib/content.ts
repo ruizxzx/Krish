@@ -1,5 +1,16 @@
 export type Accent = 'acid' | 'violet' | 'cyan' | 'orange';
 
+export type ProjectMedia = {
+  id: string;
+  type: 'image' | 'video';
+  src: string;
+  alt: string;
+  caption?: string;
+  poster?: string;
+  path?: string;
+  featured?: boolean;
+};
+
 export type Project = {
   id: string;
   slug: string;
@@ -19,6 +30,7 @@ export type Project = {
   liveUrl?: string;
   repoUrl?: string;
   featured: boolean;
+  media: ProjectMedia[];
   sections: { kicker: string; heading: string; body: string }[];
 };
 
@@ -54,7 +66,7 @@ export type SiteContent = {
   motion: { enabled: boolean; intensity: number; webgl: boolean };
 };
 
-const makeProject = (project: Omit<Project, 'id'>): Project => ({ id: project.slug, ...project });
+const makeProject = (project: Omit<Project, 'id' | 'media'>): Project => ({ id: project.slug, media: [], ...project });
 
 export const DEFAULT_CONTENT: SiteContent = {
   displayName: 'KRISH / 26',
