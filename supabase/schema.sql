@@ -49,6 +49,7 @@ create table if not exists public.portfolio_projects (
   live_url text,
   repo_url text,
   featured boolean not null default true,
+  media jsonb not null default '[]'::jsonb,
   sections jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now()
 );
@@ -85,6 +86,45 @@ create table if not exists public.portfolio_socials (
 -- using the privileged service_role used by the Supabase secret key.
 
 grant usage on schema public to anon, authenticated, service_role;
+
+-- Project visual assets.
+alter table public.portfolio_projects
+  add column if not exists media jsonb not null default '[]'::jsonb;
+
+insert into storage.buckets (id, name, public)
+values ('portfolio-media', 'portfolio-media', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "portfolio media public read" on storage.objects;
+drop policy if exists "portfolio media authenticated upload" on storage.objects;
+drop policy if exists "portfolio media authenticated update" on storage.objects;
+drop policy if exists "portfolio media authenticated delete" on storage.objects;
+
+create policy "portfolio media public read"
+on storage.objects
+for select
+using (bucket_id = 'portfolio-media');
+
+create policy "portfolio media authenticated upload"
+on storage.objects
+for insert
+to authenticated
+with check (bucket_id = 'portfolio-media');
+
+create policy "portfolio media authenticated update"
+on storage.objects
+for update
+to authenticated
+using (bucket_id = 'portfolio-media')
+with check (bucket_id = 'portfolio-media');
+
+create policy "portfolio media authenticated delete"
+on storage.objects
+for delete
+to authenticated
+using (bucket_id = 'portfolio-media');
+
+
 
 grant select on public.portfolio_site to anon, authenticated;
 grant select on public.portfolio_projects to anon, authenticated;
