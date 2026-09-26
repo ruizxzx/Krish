@@ -77,6 +77,106 @@ function Magnetic({ children, className = '', href = '#', target }: { children: 
   return <a ref={ref} href={href} target={target} rel={target ? 'noreferrer' : undefined} onMouseMove={move} onMouseLeave={leave} className={`magnetic ${className}`} data-cursor="link">{children}</a>;
 }
 
+function ProjectHoverMedia({ project }: { project: Project }) {
+  const media = project.media ?? [];
+  const [active, setActive] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const frame = useRef<number | null>(null);
+  const pointerX = useRef(0);
+  const bounds = useRef<DOMRect | null>(null);
+  const videos = useRef<(HTMLVideoElement | null)[]>([]);
+
+  useEffect(() => {
+    media.forEach((item, index) => {
+      const video = videos.current[index];
+      if (!video) return;
+      if (hovered && index === active) void video.play().catch(() => undefined);
+      else video.pause();
+    });
+  }, [active, hovered, media]);
+
+  const applyPointer = () => {
+    frame.current = null;
+    if (!bounds.current || media.length < 2) return;
+    const ratio = Math.max(0, Math.min(0.999, (pointerX.current - bounds.current.left) / bounds.current.width));
+    const next = Math.min(media.length - 1, Math.floor(ratio * media.length));
+    setActive((current) => current === next ? current : next);
+  };
+
+  const move = (event: MouseEvent<HTMLDivElement>) => {
+    if (!bounds.current || media.length < 2) return;
+    pointerX.current = event.clientX;
+    if (frame.current === null) frame.current = requestAnimationFrame(applyPointer);
+  };
+
+  const enter = () => {
+    const card = document.querySelector<HTMLElement>(\`[data-project-media="\${project.slug}"]\`);
+    bounds.current = card?.getBoundingClientRect() ?? null;
+    setHovered(true);
+    setActive(0);
+  };
+
+  const leave = () => {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    bounds.current = null;
+    setHovered(false);
+    setActive(0);
+  };
+
+  if (!media.length) {
+    return (
+      <div className="project-card-media project-card-media--generated" aria-hidden="true">
+        <div className="project-card-grid" />
+        <div className="project-card-noise" />
+        <div className="project-card-orbit project-card-orbit--one" />
+        <div className="project-card-orbit project-card-orbit--two" />
+        <div className="project-card-core"><span /></div>
+        <div className="project-card-scan" />
+        <span className="project-card-code">{project.metricLabel} / {project.metricValue}</span>
+        <span className="project-card-index">{project.index}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={\`project-card-media project-card-media--gallery \${hovered ? 'is-hovered' : ''}\`}
+      data-project-media={project.slug}
+      onMouseEnter={enter}
+      onMouseMove={move}
+      onMouseLeave={leave}
+      aria-hidden="true"
+    >
+      <div className="project-card-gallery">
+        {media.map((item, index) => (
+          <div key={item.id} className={\`project-card-gallery-item \${index === active ? 'is-active' : ''}\`}>
+            {item.type === 'video' ? (
+              <video
+                ref={(node) => { videos.current[index] = node; }}
+                src={item.src}
+                poster={item.poster || undefined}
+                muted
+                loop
+                playsInline
+                preload={index === 0 ? 'metadata' : 'none'}
+              />
+            ) : (
+              <img src={item.src} alt="" loading="lazy" />
+            )}
+            <span className="project-card-gallery-shade" />
+          </div>
+        ))}
+      </div>
+      <div className="project-card-gallery-ui">
+        <span>{project.metricLabel} / {project.metricValue}</span>
+        <span>{String(active + 1).padStart(2, '0')} / {String(media.length).padStart(2, '0')}</span>
+      </div>
+      {media.length > 1 && <div className="project-card-gallery-dots">{media.map((item, index) => <i key={item.id} className={index === active ? 'is-active' : ''} />)}</div>}
+    </div>
+  );
+}
+
 function TiltCard({ project }: { project: Project }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const frame = useRef<number | null>(null);
@@ -90,10 +190,10 @@ function TiltCard({ project }: { project: Project }) {
     if (!el || !rect) return;
     const px = (pointer.current.x - rect.left) / rect.width - 0.5;
     const py = (pointer.current.y - rect.top) / rect.height - 0.5;
-    el.style.setProperty('--tilt-x', `${py * -5}deg`);
-    el.style.setProperty('--tilt-y', `${px * 5}deg`);
-    el.style.setProperty('--parallax-x', `${px * 18}px`);
-    el.style.setProperty('--parallax-y', `${py * 18}px`);
+    el.style.setProperty('--tilt-x', \`\${py * -5}deg\`);
+    el.style.setProperty('--tilt-y', \`\${px * 5}deg\`);
+    el.style.setProperty('--parallax-x', \`\${px * 18}px\`);
+    el.style.setProperty('--parallax-y', \`\${py * 18}px\`);
   };
 
   const move = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -125,17 +225,8 @@ function TiltCard({ project }: { project: Project }) {
   };
 
   return (
-    <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label="VIEW" onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
-      <div className="project-card-media">
-        <div className="project-card-grid" />
-        <div className="project-card-noise" />
-        <div className="project-card-orbit project-card-orbit--one" />
-        <div className="project-card-orbit project-card-orbit--two" />
-        <div className="project-card-core"><span /></div>
-        <div className="project-card-scan" />
-        <span className="project-card-code">{project.metricLabel} / {project.metricValue}</span>
-        <span className="project-card-index">{project.index}</span>
-      </div>
+    <Link href={\`/work/\${project.slug}\`} ref={ref} className={\`project-card project-card--\${project.accent}\`} data-cursor="project" data-cursor-label={project.media?.length ? 'EXPLORE' : 'VIEW'} onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
+      <ProjectHoverMedia project={project} />
       <div className="project-card-info">
         <div className="project-card-heading"><span>{project.eyebrow}</span><h3>{project.title}</h3></div>
         <div className="project-card-meta"><p>{project.short}</p><span>{project.year} <b>↗</b></span></div>
@@ -143,7 +234,6 @@ function TiltCard({ project }: { project: Project }) {
     </Link>
   );
 }
-
 function ServiceRow({ item, index, active, onOpen }: { item: Service; index: number; active: number; onOpen: (next: number) => void }) {
   const isOpen = active === index;
   return (
