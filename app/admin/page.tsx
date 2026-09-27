@@ -76,6 +76,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 {['slug','title','eyebrow','category','year','status','role','stack','metric_label','metric_value','live_url','repo_url'].map((key) =>
                   <label key={key}>{key.replaceAll('_',' ')}<input name={key} defaultValue={String(project[key] ?? '')} /></label>
                 )}
+                <label className="span-2">Short description<textarea name="short" defaultValue={String(project.short ?? '')} /></label>
                 <label>Order<input name="sort_index" type="number" defaultValue={Number(project.sort_index ?? 0)} /></label>
                 <label>Accent<select name="accent" defaultValue={String(project.accent ?? 'acid')}><option value="acid">Acid</option><option value="violet">Violet</option><option value="cyan">Cyan</option><option value="orange">Orange</option></select></label>
                 <label className="check"><input type="checkbox" name="featured" defaultChecked={Boolean(project.featured)} /> Featured on home</label>

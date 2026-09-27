@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
@@ -77,14 +77,17 @@ function Magnetic({ children, className = '', href = '#', target }: { children: 
   return <a ref={ref} href={href} target={target} rel={target ? 'noreferrer' : undefined} onMouseMove={move} onMouseLeave={leave} className={`magnetic ${className}`} data-cursor="link">{children}</a>;
 }
 
-function ProjectHoverMedia({ project }: { project: Project }) {
+function ProjectHoverMedia({ project, active, hovered }: { project: Project; active: number; hovered: boolean }) {
   const media = project.media ?? [];
-  const [active, setActive] = useState(0);
-  const [hovered, setHovered] = useState(false);
-  const frame = useRef<number | null>(null);
-  const pointerX = useRef(0);
-  const bounds = useRef<DOMRect | null>(null);
   const videos = useRef<(HTMLVideoElement | null)[]>([]);
+  const [readyVideos, setReadyVideos] = useState<Set<number>>(() => new Set());
+  const [mediaRatios, setMediaRatios] = useState<Record<number, number>>({});
+
+  const updateMediaRatio = (index: number, width: number, height: number) => {
+    if (!width || !height) return;
+    const ratio = width / height;
+    setMediaRatios((current) => current[index] === ratio ? current : { ...current, [index]: ratio });
+  };
 
   useEffect(() => {
     media.forEach((item, index) => {
@@ -94,35 +97,6 @@ function ProjectHoverMedia({ project }: { project: Project }) {
       else video.pause();
     });
   }, [active, hovered, media]);
-
-  const applyPointer = () => {
-    frame.current = null;
-    if (!bounds.current || media.length < 2) return;
-    const ratio = Math.max(0, Math.min(0.999, (pointerX.current - bounds.current.left) / bounds.current.width));
-    const next = Math.min(media.length - 1, Math.floor(ratio * media.length));
-    setActive((current) => current === next ? current : next);
-  };
-
-  const move = (event: MouseEvent<HTMLDivElement>) => {
-    if (!bounds.current || media.length < 2) return;
-    pointerX.current = event.clientX;
-    if (frame.current === null) frame.current = requestAnimationFrame(applyPointer);
-  };
-
-  const enter = () => {
-    const card = document.querySelector<HTMLElement>(`[data-project-media="${project.slug}"]`);
-    bounds.current = card?.getBoundingClientRect() ?? null;
-    setHovered(true);
-    setActive(0);
-  };
-
-  const leave = () => {
-    if (frame.current !== null) cancelAnimationFrame(frame.current);
-    frame.current = null;
-    bounds.current = null;
-    setHovered(false);
-    setActive(0);
-  };
 
   if (!media.length) {
     return (
@@ -143,33 +117,60 @@ function ProjectHoverMedia({ project }: { project: Project }) {
     <div
       className={`project-card-media project-card-media--gallery ${hovered ? 'is-hovered' : ''}`}
       data-project-media={project.slug}
-      onMouseEnter={enter}
-      onMouseMove={move}
-      onMouseLeave={leave}
       aria-hidden="true"
     >
       <div className="project-card-gallery">
-        {media.map((item, index) => (
-          <div key={item.id} className={`project-card-gallery-item ${index === active ? 'is-active' : ''}`}>
+        {media.map((item, index) => {
+          const offset = index - (media.length - 1) / 2;
+          return (
+            <div
+              key={item.id}
+              className={`project-card-gallery-item ${index === active ? 'is-active' : 'is-stacked'}`}
+              style={{
+                '--stack-x': `${offset * 3.8}%`,
+                '--stack-y': `${Math.abs(offset) * 3}px`,
+                '--stack-rotation': `${offset * 0.8}deg`,
+                '--stack-scale': index === active ? '1.05' : '.98',
+                '--stack-enter-x': `${(media.length - index - 1) * 1.5}%`,
+                '--stack-enter-y': `${100 + (media.length - index) * 5}px`,
+                '--stack-enter-rotation': `${10 + (media.length - index) * 0.7}deg`,
+                '--stack-delay': `${index * 30}ms`,
+                '--media-ratio': mediaRatios[index] ?? 16 / 9,
+              } as CSSProperties}
+            >
             {item.type === 'video' ? (
-              <video
-                ref={(node) => { videos.current[index] = node; }}
-                src={item.src}
-                poster={item.poster || undefined}
-                muted
-                loop
-                playsInline
-                preload={index === 0 ? 'metadata' : 'none'}
-              />
+              <>
+                <span className="project-card-video-placeholder" aria-hidden="true">VIDEO / PREVIEW</span>
+                <video
+                  ref={(node) => { videos.current[index] = node; }}
+                  className={readyVideos.has(index) ? 'is-ready' : 'is-pending'}
+                  src={item.src}
+                  poster={item.poster || undefined}
+                  muted
+                  loop
+                  playsInline
+                  preload={index === 0 ? 'metadata' : 'none'}
+                  onLoadedData={(event) => {
+                    updateMediaRatio(index, event.currentTarget.videoWidth, event.currentTarget.videoHeight);
+                    setReadyVideos((current) => new Set(current).add(index));
+                  }}
+                />
+              </>
             ) : (
-              <img src={item.src} alt="" loading="lazy" />
+              <img
+                src={item.src}
+                alt=""
+                loading="lazy"
+                onLoad={(event) => updateMediaRatio(index, event.currentTarget.naturalWidth, event.currentTarget.naturalHeight)}
+              />
             )}
             <span className="project-card-gallery-shade" />
           </div>
-        ))}
+          );
+        })}
       </div>
       <div className="project-card-gallery-ui">
-        <span>{project.metricLabel} / {project.metricValue}</span>
+        <span>{project.title} / {project.metricLabel}</span>
         <span>{String(active + 1).padStart(2, '0')} / {String(media.length).padStart(2, '0')}</span>
       </div>
       {media.length > 1 && <div className="project-card-gallery-dots">{media.map((item, index) => <i key={item.id} className={index === active ? 'is-active' : ''} />)}</div>}
@@ -179,6 +180,8 @@ function ProjectHoverMedia({ project }: { project: Project }) {
 
 function TiltCard({ project }: { project: Project }) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const [activeMedia, setActiveMedia] = useState(0);
+  const [hovered, setHovered] = useState(false);
   const frame = useRef<number | null>(null);
   const pointer = useRef({ x: 0, y: 0 });
   const bounds = useRef<DOMRect | null>(null);
@@ -197,10 +200,15 @@ function TiltCard({ project }: { project: Project }) {
   };
 
   const move = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
     const el = ref.current;
     if (!el) return;
-    if (!bounds.current) bounds.current = el.getBoundingClientRect();
+    const rect = bounds.current ?? el.getBoundingClientRect();
+    const mediaCount = project.media?.length ?? 0;
+    if (mediaCount > 1) {
+      const ratio = Math.max(0, Math.min(0.999, (event.clientX - rect.left) / rect.width));
+      setActiveMedia(Math.floor(ratio * mediaCount));
+    }
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     pointer.current.x = event.clientX;
     pointer.current.y = event.clientY;
     if (frame.current === null) frame.current = requestAnimationFrame(apply);
@@ -210,12 +218,16 @@ function TiltCard({ project }: { project: Project }) {
     const el = ref.current;
     if (!el) return;
     bounds.current = el.getBoundingClientRect();
+    setHovered(true);
+    setActiveMedia(0);
   };
 
   const leave = () => {
     if (frame.current !== null) cancelAnimationFrame(frame.current);
     frame.current = null;
     bounds.current = null;
+    setHovered(false);
+    setActiveMedia(0);
     const el = ref.current;
     if (!el) return;
     el.style.setProperty('--tilt-x', '0deg');
@@ -226,7 +238,7 @@ function TiltCard({ project }: { project: Project }) {
 
   return (
     <Link href={`/work/${project.slug}`} ref={ref} className={`project-card project-card--${project.accent}`} data-cursor="project" data-cursor-label={project.media?.length ? 'EXPLORE' : 'VIEW'} onMouseEnter={enter} onMouseMove={move} onMouseLeave={leave}>
-      <ProjectHoverMedia project={project} />
+      <ProjectHoverMedia project={project} active={activeMedia} hovered={hovered} />
       <div className="project-card-info">
         <div className="project-card-heading"><span>{project.eyebrow}</span><h3>{project.title}</h3></div>
         <div className="project-card-meta"><p>{project.short}</p><span>{project.year} <b>↗</b></span></div>
@@ -250,7 +262,7 @@ export function Portfolio({ content }: Props) {
   const root = useRef<HTMLElement>(null);
   const [ready, setReady] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [serviceOpen, setServiceOpen] = useState(0);
+  const [serviceOpen, setServiceOpen] = useState(-1);
   const done = useCallback(() => setReady(true), []);
   const featured = useMemo(() => content.projects.filter((project) => project.featured), [content.projects]);
 

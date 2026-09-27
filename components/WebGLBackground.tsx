@@ -2,7 +2,19 @@
 
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+
+class WebGLFailureBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
 
 function ParticleField({ intensity }: { intensity: number }) {
   const points = useRef<THREE.Points>(null);
@@ -159,16 +171,18 @@ export function WebGLBackground({ intensity = 1 }: { intensity?: number }) {
   if (!enabled) return null;
 
   return (
-    <Canvas
-      dpr={[1, 1.15]}
-      camera={{ position: [0, 0, 7.1], fov: 42 }}
-      gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
-      className="hero-canvas"
-      frameloop="always"
-      fallback={<div />}
-      onCreated={({ gl }) => gl.setClearColor(new THREE.Color('#070808'), 0)}
-    >
-      <Scene intensity={Math.max(0.45, Math.min(intensity, 1.35))} />
-    </Canvas>
+    <WebGLFailureBoundary>
+      <Canvas
+        dpr={[1, 1.15]}
+        camera={{ position: [0, 0, 7.1], fov: 42 }}
+        gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
+        className="hero-canvas"
+        frameloop="always"
+        fallback={null}
+        onCreated={({ gl }) => gl.setClearColor(new THREE.Color('#070808'), 0)}
+      >
+        <Scene intensity={Math.max(0.45, Math.min(intensity, 1.35))} />
+      </Canvas>
+    </WebGLFailureBoundary>
   );
 }
