@@ -3,6 +3,7 @@ import { getPortfolioContent, portfolioAdminEmailHint, requirePortfolioAdmin, cm
 import { getClaims } from '@/lib/supabase/server';
 import { deleteProject, logoutAction, saveProject, saveSite } from './actions';
 import ProjectMediaManager from '@/components/cms/ProjectMediaManager';
+import ProfilePhotoManager from '@/components/cms/ProfilePhotoManager';
 import type { ProjectMedia } from '@/lib/content';
 import { SiteCursor } from '@/components/SiteEffects';
 
@@ -63,6 +64,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </div>
           <button className="admin-submit span-2" type="submit">Save site system ↗</button>
         </form>
+        <ProfilePhotoManager initialMedia={content.profilePhoto} />
       </section>
 
       <section className="admin-section">

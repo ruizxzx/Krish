@@ -4,6 +4,9 @@
 alter table public.portfolio_projects
   add column if not exists media jsonb not null default '[]'::jsonb;
 
+alter table public.portfolio_site
+  add column if not exists profile_photo jsonb;
+
 insert into storage.buckets (id, name, public)
 values ('portfolio-media', 'portfolio-media', true)
 on conflict (id) do update set public = true;

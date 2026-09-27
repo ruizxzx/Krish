@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requirePortfolioAdmin } from '@/lib/cms';
-import type { ProjectMedia } from '@/lib/content';
+import type { ProfileMedia, ProjectMedia } from '@/lib/content';
 import { createClient } from '@/lib/supabase/server';
 
 function text(formData: FormData, name: string) { return String(formData.get(name) ?? '').trim(); }
@@ -73,6 +73,27 @@ export async function saveSite(formData: FormData) {
   revalidatePath('/');
   revalidatePath('/work/[slug]', 'page');
   redirect('/admin?saved=site');
+}
+
+export async function saveProfileMedia(media: ProfileMedia | null) {
+  try {
+    const db = await requirePortfolioAdmin();
+    const profilePhoto = media
+      ? { src: String(media.src), alt: String(media.alt), path: media.path ? String(media.path) : '' }
+      : null;
+    const { error } = await db.from('portfolio_site').upsert({
+      id: 'default',
+      profile_photo: profilePhoto,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw error;
+    revalidatePath('/');
+    revalidatePath('/admin');
+    return { ok: true as const };
+  } catch (error) {
+    console.error('[CMS] saveProfileMedia failed', error);
+    return { ok: false as const, error: 'Save profile photo failed — ' + describeError(error) };
+  }
 }
 
 export async function saveProject(formData: FormData) {

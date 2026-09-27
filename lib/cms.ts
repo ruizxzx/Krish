@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { DEFAULT_CONTENT, type SiteContent, type Project, type Accent } from '@/lib/content';
+import { DEFAULT_CONTENT, type SiteContent, type Project, type Accent, type ProfileMedia } from '@/lib/content';
 
 const isConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 
@@ -20,6 +20,17 @@ function csv(value: unknown): string[] {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
   if (typeof value === 'string') return value.split(',').map((v) => v.trim()).filter(Boolean);
   return [];
+}
+
+function profileMedia(value: unknown): ProfileMedia | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const media = value as Record<string, unknown>;
+  if (typeof media.src !== 'string' || typeof media.alt !== 'string') return undefined;
+  return {
+    src: media.src,
+    alt: media.alt,
+    path: typeof media.path === 'string' ? media.path : undefined,
+  };
 }
 
 export async function getPortfolioContent(): Promise<SiteContent> {
@@ -64,6 +75,7 @@ export async function getPortfolioContent(): Promise<SiteContent> {
 
     return {
       ...DEFAULT_CONTENT,
+      profilePhoto: profileMedia(site?.profile_photo),
       ...(site ? {
         displayName: String(site.display_name ?? DEFAULT_CONTENT.displayName),
         navLabel: String(site.nav_label ?? DEFAULT_CONTENT.navLabel),

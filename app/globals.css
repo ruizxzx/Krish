@@ -862,6 +862,17 @@ body:before{
   transition:transform .8s var(--ease);
 }
 .identity-card:hover{transform:rotate(1deg) translateY(-8px)}
+.identity-card--has-photo:before,.identity-card--has-photo:after{display:none}
+.identity-card--has-photo .identity-scan{z-index:2;pointer-events:none}
+.identity-card--has-photo .identity-top,.identity-card--has-photo .identity-bottom{z-index:3;color:var(--v4-paper)}
+.identity-photo,.identity-photo .liquid-portrait{position:absolute;inset:0}
+.identity-photo{z-index:1;overflow:hidden}
+.identity-photo .liquid-portrait img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.86) contrast(1.06)}
+.identity-photo .liquid-portrait-tint,.identity-photo .liquid-portrait-lens,.identity-photo .liquid-portrait-shine{position:absolute;inset:0;pointer-events:none}
+.identity-photo .liquid-portrait-tint{background:linear-gradient(145deg,rgba(217,255,100,.12),transparent 40%,rgba(7,8,7,.36));mix-blend-mode:soft-light}
+.identity-photo .liquid-portrait-lens{background:radial-gradient(circle 150px at var(--mx,50%) var(--my,50%),transparent 35%,rgba(7,8,7,.3) 100%);transition:background-position .2s ease}
+.identity-photo .liquid-portrait-shine{background:radial-gradient(circle 90px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.18),transparent 80%);mix-blend-mode:screen}
+.identity-photo .liquid-portrait-label{position:absolute;right:24px;bottom:56px;color:var(--v4-paper);font:8px 'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .identity-scan{
   opacity:.1;
   background:repeating-linear-gradient(to bottom,transparent 0 19px,rgba(0,0,0,.5) 20px 21px);
@@ -1749,6 +1760,28 @@ body:after{
   border:1px solid var(--v4-line);
   background:rgba(17,17,16,.025);
 }
+.cms-profile-photo{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(220px,.55fr);
+  gap:20px 28px;
+  align-items:start;
+  margin-top:26px;
+  padding:22px;
+  border:1px solid var(--v4-line);
+}
+.cms-profile-photo-head{display:flex;grid-column:1/-1;justify-content:space-between;align-items:flex-start;gap:20px}
+.cms-profile-photo-head strong,.cms-profile-photo-head span{display:block}
+.cms-profile-photo-head strong{font-size:18px}
+.cms-profile-photo-head span,.cms-profile-photo-status{margin-top:7px;color:var(--v4-soft);font:8px 'DM Mono',monospace;text-transform:uppercase}
+.cms-profile-photo-actions{display:flex;gap:8px}
+.cms-profile-photo-preview{position:relative;grid-column:2;grid-row:2;aspect-ratio:1.2;overflow:hidden;background:var(--v4-ink)}
+.cms-profile-photo-preview>img{display:block;width:100%;height:100%;object-fit:cover}
+.cms-profile-photo-placeholder{display:grid;width:100%;height:100%;place-items:center;color:var(--v4-paper)}
+.cms-profile-photo-placeholder span{font-size:100px;font-weight:800}
+.cms-profile-photo-placeholder em{position:absolute;left:12px;bottom:12px;color:var(--v4-paper);font:8px 'DM Mono',monospace;font-style:normal;text-transform:uppercase}
+.cms-profile-glass{position:absolute;inset:0;display:grid;place-items:center;color:white;pointer-events:none}
+.cms-profile-glass span{padding:11px;border:1px solid rgba(255,255,255,.6);border-radius:50%;background:rgba(255,255,255,.12);font:8px 'DM Mono',monospace}
+.cms-profile-photo-status{grid-column:1/-1;margin:0}
 .cms-media-toolbar{
   display:flex;
   align-items:center;
@@ -1939,6 +1972,9 @@ body:after{
 }
 
 @media(max-width:900px){
+  .cms-profile-photo{grid-template-columns:1fr}
+  .cms-profile-photo-head{flex-direction:column}
+  .cms-profile-photo-preview{grid-column:1;grid-row:auto}
   .project-nav-v4{min-height:64px;padding:0 16px}
   .project-brand{gap:8px}
   .project-brand em,.project-nav-meta span{display:none}

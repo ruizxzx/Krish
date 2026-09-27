@@ -11,6 +11,12 @@ export type ProjectMedia = {
   featured?: boolean;
 };
 
+export type ProfileMedia = {
+  src: string;
+  alt: string;
+  path?: string;
+};
+
 export type Project = {
   id: string;
   slug: string;
@@ -59,6 +65,7 @@ export type SiteContent = {
   contactBody: string;
   contactEmail: string;
   footerNote: string;
+  profilePhoto?: ProfileMedia;
   projects: Project[];
   experience: Experience[];
   services: Service[];

@@ -27,8 +27,12 @@ create table if not exists public.portfolio_site (
   contact_email text not null default '',
   footer_note text not null default '',
   motion jsonb not null default '{"enabled":true,"intensity":1,"webgl":true}'::jsonb,
+  profile_photo jsonb,
   updated_at timestamptz not null default now()
 );
+
+alter table public.portfolio_site
+  add column if not exists profile_photo jsonb;
 
 create table if not exists public.portfolio_projects (
   id uuid primary key default gen_random_uuid(),
